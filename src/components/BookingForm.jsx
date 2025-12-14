@@ -4,10 +4,10 @@ import { getAvailableTimeSlots } from '../services/googleCalendar';
 import './BookingForm.css';
 
 const SERVICES = [
-    { id: 'haircut', name: 'Classic Haircut', duration: '1 hour' },
-    { id: 'beard', name: 'Beard Trim & Shape', duration: '1 hour' },
-    { id: 'full', name: 'Full Service (Haircut + Beard)', duration: '1 hour' },
-    { id: 'shave', name: 'Hot Towel Shave', duration: '1 hour' },
+    { id: 'haircut', name: 'Classic Haircut', duration: '1 hour', price: '£25' },
+    { id: 'beard', name: 'Beard Trim & Shape', duration: '1 hour', price: '£15' },
+    { id: 'full', name: 'Full Service (Haircut + Beard)', duration: '1 hour', price: '£35' },
+    { id: 'shave', name: 'Hot Towel Shave', duration: '1 hour', price: '£20' },
 ];
 
 const BookingForm = ({ onSubmit, onCancel }) => {
@@ -172,7 +172,10 @@ const BookingForm = ({ onSubmit, onCancel }) => {
                                     />
                                     <div className="service-content">
                                         <span className="service-name">{service.name}</span>
-                                        <span className="service-duration">{service.duration}</span>
+                                        <div className="service-details">
+                                            <span className="service-duration">{service.duration}</span>
+                                            <span className="service-price">{service.price}</span>
+                                        </div>
                                     </div>
                                 </label>
                             ))}

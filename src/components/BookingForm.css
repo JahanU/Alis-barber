@@ -131,9 +131,22 @@ select.error {
     font-size: 1rem;
 }
 
+.service-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
 .service-duration {
     font-size: 0.85rem;
     color: var(--color-text-muted);
+}
+
+.service-price {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
 }
 
 .service-card.selected .service-name {
