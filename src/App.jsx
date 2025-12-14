@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Hero from './components/Hero';
+import Gallery from './components/Gallery';
 import BookingForm from './components/BookingForm';
 import ConfirmationModal from './components/ConfirmationModal';
 import { initGoogleClient, signIn, createCalendarEvent, isSignedIn } from './services/googleCalendar';
@@ -87,7 +88,10 @@ function App() {
       )}
 
       {currentView === 'hero' && (
-        <Hero onBookNow={handleBookNowClick} />
+        <>
+          <Hero onBookNow={handleBookNowClick} />
+          <Gallery />
+        </>
       )}
 
       {currentView === 'booking' && (

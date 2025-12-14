@@ -11,9 +11,8 @@ const Hero = ({ onBookNow }) => {
             <div className="container hero-content">
                 <div className="hero-text fade-in">
                     <h1>
-                        <span className="hero-title-line">Premium</span>
-                        <span className="hero-title-line text-gradient">Barbering</span>
-                        <span className="hero-title-line">Excellence</span>
+                        <span className="hero-title-line text-gradient">Ali Barbers</span>
+                        <span className="hero-subtitle">Premium Barbering Excellence</span>
                     </h1>
 
                     <p className="hero-description">

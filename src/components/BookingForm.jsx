@@ -144,7 +144,7 @@ const BookingForm = ({ onSubmit, onCancel }) => {
                                 name="customerPhone"
                                 value={formData.customerPhone}
                                 onChange={handleInputChange}
-                                placeholder="(555) 123-4567"
+                                placeholder="+44 7123 456789"
                                 className={errors.customerPhone ? 'error' : ''}
                             />
                             {errors.customerPhone && <span className="error-message">{errors.customerPhone}</span>}
