@@ -1,8 +1,15 @@
 import React from 'react';
 import './TimeSlotPicker.css';
 
-const TimeSlotPicker = ({ selectedDate, selectedSlot, onSlotSelect, availableSlots }) => {
-    const formatDate = (date) => {
+interface TimeSlotPickerProps {
+    selectedDate: string;
+    selectedSlot: string;
+    onSlotSelect: (slot: string) => void;
+    availableSlots: string[];
+}
+
+const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({ selectedDate, selectedSlot, onSlotSelect, availableSlots }) => {
+    const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',

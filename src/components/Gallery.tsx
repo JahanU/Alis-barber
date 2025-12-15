@@ -1,7 +1,14 @@
 import React from 'react';
 import './Gallery.css';
 
-const GALLERY_ITEMS = [
+interface GalleryItem {
+    id: number;
+    image: string;
+    title: string;
+    description: string;
+}
+
+const GALLERY_ITEMS: GalleryItem[] = [
     {
         id: 1,
         image: '/classic-fade.png',
@@ -40,7 +47,9 @@ const GALLERY_ITEMS = [
     },
 ];
 
-const Gallery = () => {
+
+
+const Gallery: React.FC = () => {
     return (
         <section className="gallery">
             <div className="container">

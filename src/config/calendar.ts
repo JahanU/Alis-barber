@@ -1,5 +1,11 @@
 // Google Calendar API Configuration
-export const GOOGLE_CONFIG = {
+export interface GoogleConfig {
+  clientId: string;
+  scopes: string;
+  discoveryDocs: string[];
+}
+
+export const GOOGLE_CONFIG: GoogleConfig = {
   // TODO: Replace with your Google OAuth Client ID
   // Get this from: https://console.cloud.google.com/apis/credentials
   clientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
@@ -12,7 +18,17 @@ export const GOOGLE_CONFIG = {
 };
 
 // Calendar event settings
-export const CALENDAR_SETTINGS = {
+export interface CalendarSettings {
+  calendarId: string;
+  eventDuration: number;
+  businessHours: {
+    start: number;
+    end: number;
+  };
+  timeZone: string;
+}
+
+export const CALENDAR_SETTINGS: CalendarSettings = {
   // Calendar to add events to - All bookings will go to this calendar
   calendarId: 'JahannU12@gmail.com',
 

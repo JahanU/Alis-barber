@@ -1,8 +1,17 @@
 import React from 'react';
 import './ConfirmationModal.css';
 
-const ConfirmationModal = ({ bookingDetails, onClose, onAddToCalendar, isAddingToCalendar }) => {
-    const formatDate = (dateString) => {
+import { BookingData } from '../services/googleCalendar';
+
+interface ConfirmationModalProps {
+    bookingDetails: BookingData;
+    onClose: () => void;
+    onAddToCalendar: () => void;
+    isAddingToCalendar: boolean;
+}
+
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ bookingDetails, onClose, onAddToCalendar, isAddingToCalendar }) => {
+    const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -11,8 +20,8 @@ const ConfirmationModal = ({ bookingDetails, onClose, onAddToCalendar, isAddingT
         });
     };
 
-    const getServiceName = (serviceId) => {
-        const services = {
+    const getServiceName = (serviceId: string) => {
+        const services: Record<string, string> = {
             haircut: 'Classic Haircut',
             beard: 'Beard Trim & Shape',
             full: 'Full Service (Haircut + Beard)',

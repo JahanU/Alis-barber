@@ -1,10 +1,19 @@
 import { gapi } from 'gapi-script';
 import { GOOGLE_CONFIG, CALENDAR_SETTINGS } from '../config/calendar';
 
+export interface BookingData {
+    date: string;
+    timeSlot: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    service: string;
+}
+
 /**
  * Initialize the Google API client
  */
-export const initGoogleClient = () => {
+export const initGoogleClient = (): Promise<void> => {
     return new Promise((resolve, reject) => {
         gapi.load('client:auth2', async () => {
             try {
@@ -25,7 +34,7 @@ export const initGoogleClient = () => {
 /**
  * Sign in to Google account
  */
-export const signIn = async () => {
+export const signIn = async (): Promise<boolean> => {
     try {
         const authInstance = gapi.auth2.getAuthInstance();
         await authInstance.signIn();
@@ -39,7 +48,7 @@ export const signIn = async () => {
 /**
  * Sign out from Google account
  */
-export const signOut = async () => {
+export const signOut = async (): Promise<boolean> => {
     try {
         const authInstance = gapi.auth2.getAuthInstance();
         await authInstance.signOut();
@@ -53,22 +62,15 @@ export const signOut = async () => {
 /**
  * Check if user is signed in
  */
-export const isSignedIn = () => {
+export const isSignedIn = (): boolean => {
     const authInstance = gapi.auth2.getAuthInstance();
     return authInstance ? authInstance.isSignedIn.get() : false;
 };
 
 /**
  * Create a calendar event
- * @param {Object} bookingData - The booking data
- * @param {Date} bookingData.date - The booking date
- * @param {string} bookingData.timeSlot - The time slot (e.g., '10:00 AM')
- * @param {string} bookingData.customerName - Customer's name
- * @param {string} bookingData.customerEmail - Customer's email
- * @param {string} bookingData.customerPhone - Customer's phone
- * @param {string} bookingData.service - Selected service
  */
-export const createCalendarEvent = async (bookingData) => {
+export const createCalendarEvent = async (bookingData: BookingData): Promise<any> => {
     try {
         const { date, timeSlot, customerName, customerEmail, customerPhone, service } = bookingData;
 
@@ -129,7 +131,7 @@ Thank you for booking with us!
             calendarId: CALENDAR_SETTINGS.calendarId,
             resource: event,
             sendUpdates: 'all', // Send email notifications to attendees
-        });
+        } as any);
 
         return response.result;
     } catch (error) {
@@ -140,11 +142,9 @@ Thank you for booking with us!
 
 /**
  * Get available time slots for a given date
- * This is a simple implementation that returns all business hours
- * You could enhance this to check existing calendar events
  */
-export const getAvailableTimeSlots = (date) => {
-    const slots = [];
+export const getAvailableTimeSlots = (_date: Date): string[] => {
+    const slots: string[] = [];
     const { start, end } = CALENDAR_SETTINGS.businessHours;
 
     for (let hour = start; hour < end; hour++) {

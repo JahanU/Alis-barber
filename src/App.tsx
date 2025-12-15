@@ -3,15 +3,15 @@ import Hero from './components/Hero';
 import Gallery from './components/Gallery';
 import BookingForm from './components/BookingForm';
 import ConfirmationModal from './components/ConfirmationModal';
-import { initGoogleClient, signIn, createCalendarEvent, isSignedIn } from './services/googleCalendar';
+import { initGoogleClient, signIn, createCalendarEvent, isSignedIn, BookingData } from './services/googleCalendar';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('hero'); // 'hero', 'booking', 'confirmation'
-  const [bookingData, setBookingData] = useState(null);
-  const [isGoogleInitialized, setIsGoogleInitialized] = useState(false);
-  const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
-  const [error, setError] = useState(null);
+  const [currentView, setCurrentView] = useState<'hero' | 'booking' | 'confirmation'>('hero');
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [isGoogleInitialized, setIsGoogleInitialized] = useState<boolean>(false);
+  const [isAddingToCalendar, setIsAddingToCalendar] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Initialize Google API client on mount
   useEffect(() => {
@@ -33,7 +33,7 @@ function App() {
     setError(null);
   };
 
-  const handleBookingSubmit = (formData) => {
+  const handleBookingSubmit = (formData: BookingData) => {
     setBookingData(formData);
     setCurrentView('confirmation');
   };
@@ -64,11 +64,15 @@ function App() {
         await signIn();
       }
 
+      if (!bookingData) {
+        throw new Error('No booking data available');
+      }
+
       // Create the calendar event
       await createCalendarEvent(bookingData);
 
       alert('Successfully added to Google Calendar! Check your calendar for the appointment.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding to calendar:', error);
       setError(error.message || 'Failed to add to Google Calendar. Please try again.');
     } finally {

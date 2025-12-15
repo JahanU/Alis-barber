@@ -1,7 +1,11 @@
 import React from 'react';
 import './Hero.css';
 
-const Hero = ({ onBookNow }) => {
+interface HeroProps {
+    onBookNow: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onBookNow }) => {
     return (
         <section className="hero">
             <div className="hero-background">
