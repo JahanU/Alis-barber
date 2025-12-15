@@ -153,10 +153,18 @@
 @media (max-width: 768px) {
     .modal-overlay {
         padding: var(--spacing-sm);
+        align-items: flex-end;
+        /* Sheet-like appearance on mobile */
     }
 
     .modal-content {
-        padding: var(--spacing-md);
+        padding: var(--spacing-lg);
+        max-height: 85vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
     }
 
     .booking-details {
@@ -164,12 +172,14 @@
     }
 
     .detail-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
+        flex-direction: row;
+        /* Keep side-by-side if possible, or wrap */
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.5rem;
     }
 
     .detail-value {
-        text-align: left;
+        text-align: right;
     }
 }

@@ -102,3 +102,21 @@
 .back-link:hover {
     color: var(--color-text-primary);
 }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-container {
+        padding: var(--spacing-sm);
+    }
+
+    .login-card {
+        padding: var(--spacing-lg);
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .login-header h2 {
+        font-size: 1.75rem;
+    }
+}

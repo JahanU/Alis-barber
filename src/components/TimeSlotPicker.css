@@ -93,15 +93,21 @@
 /* Responsive */
 @media (max-width: 768px) {
     .time-slots-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        /* More compact grid */
         gap: var(--spacing-xs);
     }
 
     .time-slot {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-md) var(--spacing-xs);
+        /* Larger touch target vertical */
     }
 
     .slot-time {
         font-size: 1rem;
+    }
+
+    .slot-duration {
+        font-size: 0.75rem;
     }
 }

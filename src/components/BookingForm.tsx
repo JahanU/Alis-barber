@@ -119,11 +119,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel }) => {
         <div className="booking-form-container">
             <div className="booking-form-header">
                 <h2>Book Your Appointment</h2>
-                <button className="close-btn" onClick={onCancel} aria-label="Close">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                </button>
+
             </div>
 
             <form onSubmit={handleSubmit} className="booking-form">
@@ -138,7 +134,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel }) => {
                             name="customerName"
                             value={formData.customerName}
                             onChange={handleInputChange}
-                            placeholder="John Doe"
+                            placeholder="Adam Nolan"
                             className={errors.customerName ? 'error' : ''}
                         />
                         {errors.customerName && <span className="error-message">{errors.customerName}</span>}
@@ -153,7 +149,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel }) => {
                                 name="customerEmail"
                                 value={formData.customerEmail}
                                 onChange={handleInputChange}
-                                placeholder="john@example.com"
+                                placeholder="adam@gmail.com"
                                 className={errors.customerEmail ? 'error' : ''}
                             />
                             {errors.customerEmail && <span className="error-message">{errors.customerEmail}</span>}

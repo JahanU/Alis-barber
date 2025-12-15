@@ -154,20 +154,45 @@
 @media (max-width: 768px) {
     .hero {
         min-height: auto;
-        padding: var(--spacing-xl) 0;
+        padding: var(--spacing-xl) var(--spacing-sm);
+        text-align: center;
+    }
+
+    .hero-content {
+        gap: var(--spacing-xl);
+    }
+
+    .hero-title-line {
+        font-size: clamp(2rem, 8vw, 3rem);
+        /* Responsive font size */
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        margin-top: var(--spacing-xs);
     }
 
     .hero-description {
         font-size: 1rem;
+        padding: 0 var(--spacing-sm);
     }
 
     .hero-features {
         grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
+        gap: var(--spacing-md);
+        padding: 0 var(--spacing-sm);
+    }
+
+    .feature-card {
+        padding: var(--spacing-md);
+        background: rgba(255, 255, 255, 0.03);
+        /* Slight background for better visibility */
     }
 
     .btn-large {
-        padding: 0.875rem 2rem;
-        font-size: 1rem;
+        width: 100%;
+        max-width: 300px;
+        padding: 1rem;
+        font-size: 1.1rem;
     }
 }
