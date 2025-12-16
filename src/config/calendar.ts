@@ -8,7 +8,7 @@ export interface GoogleConfig {
 export const GOOGLE_CONFIG: GoogleConfig = {
   // TODO: Replace with your Google OAuth Client ID
   // Get this from: https://console.cloud.google.com/apis/credentials
-  clientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+  clientId: '938898755882-87j0aied3gf991t1f0n6eh1meo8rgvb9.apps.googleusercontent.com',
 
   // API scopes - what permissions we're requesting
   scopes: 'https://www.googleapis.com/auth/calendar.events',
