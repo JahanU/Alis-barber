@@ -50,6 +50,12 @@ const Hero: React.FC<HeroProps> = ({ onBookNow }) => {
                         <h3>Google Calendar</h3>
                         <p>Automatic reminders for your appointment</p>
                     </div>
+
+                    <div className="feature-card glass">
+                        <div className="feature-icon">🏠</div>
+                        <h3>Home Bookings</h3>
+                        <p>Enjoy premium barbering in your own space</p>
+                    </div>
                 </div>
             </div>
         </section>
