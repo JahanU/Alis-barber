@@ -3,8 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GOOGLE_CONFIG } from './config/calendar';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <GoogleOAuthProvider clientId={GOOGLE_CONFIG.clientId}>
+      <App />
+    </GoogleOAuthProvider>
   </StrictMode>,
 )

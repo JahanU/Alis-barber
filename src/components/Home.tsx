@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import Hero from './Hero';
 import Gallery from './Gallery';
 import BookingForm from './BookingForm';
 import ConfirmationModal from './ConfirmationModal';
-import { initGoogleClient, signIn, createCalendarEvent, isSignedIn, BookingData } from '../services/googleCalendar';
+import { useGoogleLogin } from '@react-oauth/google';
+import { initGoogleClient, createCalendarEvent, setAccessToken, BookingData } from '../services/googleCalendar';
+import { createBooking } from '../services/bookingApi';
 import '../App.css';
 
 const Home: React.FC = () => {
@@ -12,30 +15,71 @@ const Home: React.FC = () => {
     const [isGoogleInitialized, setIsGoogleInitialized] = useState<boolean>(false);
     const [isAddingToCalendar, setIsAddingToCalendar] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Initialize Google API client on mount
     useEffect(() => {
-        const initGoogle = async () => {
+        const initializeGoogle = async () => {
             try {
                 await initGoogleClient();
                 setIsGoogleInitialized(true);
             } catch (error) {
-                console.error('Failed to initialize Google API:', error);
-                // App will still work, but calendar integration won't be available
+                console.error('Failed to initialize Google Calendar:', error);
+                setError('Failed to connect to Google Calendar services');
             }
         };
 
-        initGoogle();
+        initializeGoogle();
     }, []);
+
+    const login = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                setIsAddingToCalendar(true);
+                // Set the access token for gapi client
+                setAccessToken(tokenResponse.access_token);
+
+                if (bookingData) {
+                    await createCalendarEvent(bookingData);
+                    alert('Booking added to your Google Calendar!');
+                    handleCloseConfirmation();
+                }
+            } catch (error) {
+                console.error('Error adding to calendar:', error);
+                setError('Failed to add event to calendar. Please try again.');
+            } finally {
+                setIsAddingToCalendar(false);
+            }
+        },
+        onError: (error) => {
+            console.error('Login Failed:', error);
+            setError('Google Sign-In failed. Please try again.');
+        },
+        scope: 'https://www.googleapis.com/auth/calendar.events',
+    });
 
     const handleBookNowClick = () => {
         setCurrentView('booking');
         setError(null);
     };
 
-    const handleBookingSubmit = (formData: BookingData) => {
-        setBookingData(formData);
-        setCurrentView('confirmation');
+    const handleBookingSubmit = async (formData: BookingData) => {
+        try {
+            setIsSubmitting(true);
+            setError(null);
+
+            // Create booking via Netlify Function (Server-side)
+            await createBooking(formData);
+
+            setBookingData(formData);
+            setCurrentView('confirmation');
+            window.scrollTo(0, 0);
+        } catch (error: any) {
+            console.error('Booking failed:', error);
+            setError(error.message || 'Failed to create booking. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleCancelBooking = () => {
@@ -49,35 +93,12 @@ const Home: React.FC = () => {
         setError(null);
     };
 
-    const handleAddToCalendar = async () => {
+    const handleAddToCalendar = () => {
         if (!isGoogleInitialized) {
             setError('Google Calendar is not initialized. Please refresh the page and try again.');
             return;
         }
-
-        setIsAddingToCalendar(true);
-        setError(null);
-
-        try {
-            // Check if user is signed in, if not, sign them in
-            if (!isSignedIn()) {
-                await signIn();
-            }
-
-            if (!bookingData) {
-                throw new Error('No booking data available');
-            }
-
-            // Create the calendar event
-            await createCalendarEvent(bookingData);
-
-            alert('Successfully added to Google Calendar! Check your calendar for the appointment.');
-        } catch (error: any) {
-            console.error('Error adding to calendar:', error);
-            setError(error.message || 'Failed to add to Google Calendar. Please try again.');
-        } finally {
-            setIsAddingToCalendar(false);
-        }
+        login();
     };
 
     return (
@@ -104,6 +125,7 @@ const Home: React.FC = () => {
                         <BookingForm
                             onSubmit={handleBookingSubmit}
                             onCancel={handleCancelBooking}
+                            isSubmitting={isSubmitting}
                         />
                     </div>
                 </div>

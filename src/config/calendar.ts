@@ -8,7 +8,7 @@ export interface GoogleConfig {
 export const GOOGLE_CONFIG: GoogleConfig = {
   // TODO: Replace with your Google OAuth Client ID
   // Get this from: https://console.cloud.google.com/apis/credentials
-  clientId: '938898755882-87j0aied3gf991t1f0n6eh1meo8rgvb9.apps.googleusercontent.com',
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
 
   // API scopes - what permissions we're requesting
   scopes: 'https://www.googleapis.com/auth/calendar.events',
@@ -20,6 +20,7 @@ export const GOOGLE_CONFIG: GoogleConfig = {
 // Calendar event settings
 export interface CalendarSettings {
   calendarId: string;
+  barberEmail: string;
   eventDuration: number;
   businessHours: {
     start: number;
@@ -29,8 +30,11 @@ export interface CalendarSettings {
 }
 
 export const CALENDAR_SETTINGS: CalendarSettings = {
-  // Calendar to add events to - All bookings will go to this calendar
-  calendarId: 'JahannU12@gmail.com',
+  // Calendar to add events to - 'primary' means the user's main calendar
+  calendarId: 'primary',
+
+  // Barber's email for notifications (will be added as attendee)
+  barberEmail: import.meta.env.VITE_BARBER_EMAIL || '',
 
   // Event duration in hours
   eventDuration: 1,

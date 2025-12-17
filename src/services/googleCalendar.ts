@@ -11,15 +11,16 @@ export interface BookingData {
 }
 
 /**
- * Initialize the Google API client
+ * Initialize the Google API client (only the client, not auth2)
  */
 export const initGoogleClient = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-        gapi.load('client:auth2', async () => {
+        gapi.load('client', async () => {
             try {
+                console.log('Initializing Google Client...');
                 await gapi.client.init({
-                    clientId: GOOGLE_CONFIG.clientId,
-                    scope: GOOGLE_CONFIG.scopes,
+                    // clientId is not needed for client.init in the new model, 
+                    // but we need discovery docs
                     discoveryDocs: GOOGLE_CONFIG.discoveryDocs,
                 });
                 resolve();
@@ -32,39 +33,10 @@ export const initGoogleClient = (): Promise<void> => {
 };
 
 /**
- * Sign in to Google account
+ * Set the access token for the Google API client
  */
-export const signIn = async (): Promise<boolean> => {
-    try {
-        const authInstance = gapi.auth2.getAuthInstance();
-        await authInstance.signIn();
-        return true;
-    } catch (error) {
-        console.error('Error signing in:', error);
-        throw new Error('Failed to sign in to Google account');
-    }
-};
-
-/**
- * Sign out from Google account
- */
-export const signOut = async (): Promise<boolean> => {
-    try {
-        const authInstance = gapi.auth2.getAuthInstance();
-        await authInstance.signOut();
-        return true;
-    } catch (error) {
-        console.error('Error signing out:', error);
-        throw new Error('Failed to sign out');
-    }
-};
-
-/**
- * Check if user is signed in
- */
-export const isSignedIn = (): boolean => {
-    const authInstance = gapi.auth2.getAuthInstance();
-    return authInstance ? authInstance.isSignedIn.get() : false;
+export const setAccessToken = (token: string) => {
+    gapi.client.setToken({ access_token: token });
 };
 
 /**
@@ -115,6 +87,7 @@ Thank you for booking with us!
             },
             attendees: [
                 { email: customerEmail },
+                { email: CALENDAR_SETTINGS.barberEmail },
             ],
             reminders: {
                 useDefault: false,

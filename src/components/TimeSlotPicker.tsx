@@ -33,6 +33,7 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({ selectedDate, selectedS
                 <div className="time-slots-grid">
                     {availableSlots.map((slot) => (
                         <button
+                            type="button"
                             key={slot}
                             className={`time-slot ${selectedSlot === slot ? 'selected' : ''}`}
                             onClick={() => onSlotSelect(slot)}
