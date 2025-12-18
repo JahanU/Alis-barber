@@ -22,11 +22,23 @@ export const handler: Handler = async (event) => {
 
         // Priority 1: Check for individual environment variables (Most user-friendly for Netlify)
         if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+            let key = process.env.GOOGLE_PRIVATE_KEY.trim();
+
+            // Fix 1: Strip surrounding double quotes if the user pasted them from the JSON file
+            if (key.startsWith('"') && key.endsWith('"')) {
+                key = key.substring(1, key.length - 1);
+            }
+
+            // Fix 2: Handle both literal newlines and escaped \n sequences
+            key = key.replace(/\\n/g, '\n');
+
             serviceAccount = {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                // Ensure private key handles escaped newlines correctly if passed as a string
-                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+                client_email: process.env.GOOGLE_CLIENT_EMAIL.trim(),
+                private_key: key,
             };
+
+            // Safety check for logs (doesn't expose the secret part)
+            console.log(`Key format check: Starts with "${key.substring(0, 25)}", Ends with "${key.substring(key.length - 25)}"`);
         }
         // Priority 2: Check for GOOGLE_SERVICE_ACCOUNT environment variable (JSON blob)
         else if (process.env.GOOGLE_SERVICE_ACCOUNT) {
