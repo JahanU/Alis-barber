@@ -22,38 +22,36 @@ export const handler: Handler = async (event) => {
 
         // Priority 1: Check for individual environment variables (Most user-friendly for Netlify)
         if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
-            let key = process.env.GOOGLE_PRIVATE_KEY.trim();
+            let rawKey = process.env.GOOGLE_PRIVATE_KEY.trim();
 
-            // Fix 1: Strip surrounding double quotes or single quotes
-            if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
-                key = key.substring(1, key.length - 1);
+            // Fix: Strip surrounding quotes
+            if ((rawKey.startsWith('"') && rawKey.endsWith('"')) || (rawKey.startsWith("'") && rawKey.endsWith("'"))) {
+                rawKey = rawKey.substring(1, rawKey.length - 1);
             }
 
-            // Fix 2: Handle both literal newlines and escaped \n sequences
-            key = key.replace(/\\n/g, '\n');
+            // Bulletproof Reconstruction:
+            // 1. Remove the header and footer temporarily
+            // 2. Remove ALL whitespace/newlines from the actual key data
+            // 3. Re-wrap into 64-character lines (PEM Standard)
+            const header = "-----BEGIN PRIVATE KEY-----";
+            const footer = "-----END PRIVATE KEY-----";
 
-            // Fix 3: Handle keys that were pasted as a single line with spaces (Common in Netlify UI)
-            if (!key.includes('\n') && key.includes(' ')) {
-                console.log('Detected single-line key with spaces. Reformatting...');
-                key = key
-                    .replace('-----BEGIN PRIVATE KEY----- ', '-----BEGIN PRIVATE KEY-----\n')
-                    .replace(' -----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
-                    .replace(/\s+/g, '\n'); // Replace remaining spaces with newlines
+            let keyBody = rawKey
+                .replace(header, "")
+                .replace(footer, "")
+                .replace(/\\n/g, "")
+                .replace(/\s+/g, "");
 
-                // Ensure the header and footer are still clean if they got double-newlined
-                key = key.replace('-----BEGIN\nPRIVATE\nKEY-----', '-----BEGIN PRIVATE KEY-----');
-                key = key.replace('-----END\nPRIVATE\nKEY-----', '-----END PRIVATE KEY-----');
-            }
+            const wrappedBody = keyBody.match(/.{1,64}/g)?.join('\n');
+            const finalKey = `${header}\n${wrappedBody}\n${footer}\n`;
 
             serviceAccount = {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL.trim(),
-                private_key: key,
+                private_key: finalKey,
             };
 
-            // Safety check for logs
-            console.log(`Key Diagnostics: length=${key.length}, lines=${key.split('\n').length}`);
-            console.log(`Key starts with: "${key.substring(0, 30)}..."`);
-            console.log(`Key ends with: "...${key.substring(key.length - 30)}"`);
+            // Safety Diagnostics
+            console.log(`Key Reconstructed: length=${finalKey.length}, lines=${finalKey.split('\n').length}`);
         }
         // Priority 2: Check for GOOGLE_SERVICE_ACCOUNT environment variable (JSON blob)
         else if (process.env.GOOGLE_SERVICE_ACCOUNT) {
