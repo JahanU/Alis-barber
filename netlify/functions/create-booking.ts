@@ -101,23 +101,43 @@ export const handler: Handler = async (event) => {
 
         };
 
-        const response = await calendar.events.insert({
-            calendarId: process.env.BARBER_CALENDAR_ID || '',
-            requestBody: calendarEvent,
-            sendUpdates: 'all',
-        });
+        const calendarId = process.env.BARBER_CALENDAR_ID || 'primary';
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Booking created', event: response.data }),
-        };
-    } catch (error) {
-        console.error('Error creating booking:', error);
+        console.log(`Attempting to insert event into calendar: ${calendarId}`);
+
+        try {
+            const response = await calendar.events.insert({
+                calendarId: calendarId,
+                requestBody: calendarEvent,
+                sendUpdates: 'all',
+            });
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    message: 'Booking created',
+                    event: response.data
+                }),
+            };
+        } catch (apiError: any) {
+            console.error('Google API Error:', apiError);
+            return {
+                statusCode: 500,
+                body: JSON.stringify({
+                    error: 'Google API Error',
+                    message: apiError.message,
+                    details: apiError.response?.data?.error || apiError.errors || 'Unknown API error'
+                }),
+            };
+        }
+    } catch (error: any) {
+        console.error('Setup Error:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({
-                error: 'Failed to create booking',
-                details: error instanceof Error ? error.message : String(error)
+                error: 'Function Setup Failure',
+                message: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             }),
         };
     }
