@@ -11,6 +11,7 @@ export const handler: Handler = async (event) => {
     }
 
     try {
+        const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
 
         if (!fs.existsSync(serviceAccountPath)) {
             throw new Error(`Service account file not found at ${serviceAccountPath}`);
