@@ -1,3 +1,9 @@
+/**
+ * CONFIGURATION: Google & Calendar Settings
+ * 
+ * ROLE: Centralized settings for both frontend and backend integrations.
+ * SETTINGS: Includes OAuth Client IDs, business hours, and default calendar aliases.
+ */
 // Google Calendar API Configuration
 export interface GoogleConfig {
   clientId: string;

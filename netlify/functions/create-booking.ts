@@ -1,3 +1,10 @@
+/**
+ * BACKEND FUNCTION: Create Booking
+ * 
+ * ROLE: The "Bot" that automatically records appointments for the Barber shop.
+ * ACTIONS: Authenticates via a Google Service Account to directly insert events
+ * into the BARBER'S calendar (configured via BARBER_CALENDAR_ID).
+ */
 import { Handler } from '@netlify/functions';
 import { google } from 'googleapis';
 import * as fs from 'fs';

@@ -1,3 +1,9 @@
+/**
+ * API SERVICE: Backend Bridge
+ * 
+ * ROLE: Connects the React frontend to the Netlify backend functions.
+ * ACTIONS: Sends booking data from the form to the 'create-booking' server-side function.
+ */
 import { BookingData } from './googleCalendar';
 
 export const createBooking = async (bookingData: BookingData) => {

@@ -1,3 +1,10 @@
+/**
+ * SERVICE: Frontend Google Calendar Integration
+ * 
+ * ROLE: Handles the "Add to Google Calendar" button on the frontend.
+ * ACTIONS: Uses standard Fetch API to create events on the CUSTOMER'S primary calendar
+ * after they have authenticated via Google OAuth.
+ */
 import { CALENDAR_SETTINGS } from '../config/calendar';
 
 export interface BookingData {
