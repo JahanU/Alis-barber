@@ -24,21 +24,28 @@ export const handler: Handler = async (event) => {
         if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
             let key = process.env.GOOGLE_PRIVATE_KEY.trim();
 
-            // Fix 1: Strip surrounding double quotes if the user pasted them from the JSON file
-            if (key.startsWith('"') && key.endsWith('"')) {
+            // Fix 1: Strip surrounding double quotes or single quotes
+            if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
                 key = key.substring(1, key.length - 1);
             }
 
-            // Fix 2: Handle both literal newlines and escaped \n sequences
+            // Fix 2: Standardize newlines. Replace literal "\n" strings with real newline characters.
             key = key.replace(/\\n/g, '\n');
+
+            // Fix 3: If it's still all on one line but doesn't have \n, it might be mangled
+            if (!key.includes('\n')) {
+                console.warn('Warning: Private key has no newlines. This usually causes decoding errors.');
+            }
 
             serviceAccount = {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL.trim(),
                 private_key: key,
             };
 
-            // Safety check for logs (doesn't expose the secret part)
-            console.log(`Key format check: Starts with "${key.substring(0, 25)}", Ends with "${key.substring(key.length - 25)}"`);
+            // Safety check for logs
+            console.log(`Key Diagnostics: length=${key.length}, lines=${key.split('\n').length}`);
+            console.log(`Key starts with: "${key.substring(0, 30)}..."`);
+            console.log(`Key ends with: "...${key.substring(key.length - 30)}"`);
         }
         // Priority 2: Check for GOOGLE_SERVICE_ACCOUNT environment variable (JSON blob)
         else if (process.env.GOOGLE_SERVICE_ACCOUNT) {
