@@ -18,16 +18,32 @@ export const handler: Handler = async (event) => {
     }
 
     try {
-        const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
+        let serviceAccount: any;
 
-        if (!fs.existsSync(serviceAccountPath)) {
-            throw new Error(`Service account file not found at ${serviceAccountPath}`);
+        // Priority 1: Check for GOOGLE_SERVICE_ACCOUNT environment variable (Production)
+        if (process.env.GOOGLE_SERVICE_ACCOUNT) {
+            try {
+                serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+                if (!serviceAccount.private_key || !serviceAccount.client_email) {
+                    throw new Error('GOOGLE_SERVICE_ACCOUNT env var is missing required fields (private_key or client_email)');
+                }
+            } catch (e) {
+                console.error('Failed to parse GOOGLE_SERVICE_ACCOUNT env var:', e);
+                throw new Error('GOOGLE_SERVICE_ACCOUNT environment variable is not valid JSON');
+            }
+        }
+        // Priority 2: Fall back to local service-account.json file (Local Dev)
+        else {
+            const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
+            if (fs.existsSync(serviceAccountPath)) {
+                serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+            } else {
+                throw new Error('Google Credentials not found. Please set the GOOGLE_SERVICE_ACCOUNT env var or provide a service-account.json file.');
+            }
         }
 
-        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-
         if (!serviceAccount.private_key) {
-            throw new Error('Invalid Service Account file. Missing "private_key". Did you download the OAuth Client ID instead of the Service Account Key?');
+            throw new Error('Invalid Service Account credentials. Missing "private_key".');
         }
 
 
