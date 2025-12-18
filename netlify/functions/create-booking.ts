@@ -29,12 +29,20 @@ export const handler: Handler = async (event) => {
                 key = key.substring(1, key.length - 1);
             }
 
-            // Fix 2: Standardize newlines. Replace literal "\n" strings with real newline characters.
+            // Fix 2: Handle both literal newlines and escaped \n sequences
             key = key.replace(/\\n/g, '\n');
 
-            // Fix 3: If it's still all on one line but doesn't have \n, it might be mangled
-            if (!key.includes('\n')) {
-                console.warn('Warning: Private key has no newlines. This usually causes decoding errors.');
+            // Fix 3: Handle keys that were pasted as a single line with spaces (Common in Netlify UI)
+            if (!key.includes('\n') && key.includes(' ')) {
+                console.log('Detected single-line key with spaces. Reformatting...');
+                key = key
+                    .replace('-----BEGIN PRIVATE KEY----- ', '-----BEGIN PRIVATE KEY-----\n')
+                    .replace(' -----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
+                    .replace(/\s+/g, '\n'); // Replace remaining spaces with newlines
+
+                // Ensure the header and footer are still clean if they got double-newlined
+                key = key.replace('-----BEGIN\nPRIVATE\nKEY-----', '-----BEGIN PRIVATE KEY-----');
+                key = key.replace('-----END\nPRIVATE\nKEY-----', '-----END PRIVATE KEY-----');
             }
 
             serviceAccount = {
