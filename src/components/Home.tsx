@@ -1,42 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Hero from './Hero';
 import Gallery from './Gallery';
 import BookingForm from './BookingForm';
 import ConfirmationModal from './ConfirmationModal';
 import { useGoogleLogin } from '@react-oauth/google';
-import { initGoogleClient, createCalendarEvent, setAccessToken, BookingData } from '../services/googleCalendar';
+import { createCalendarEvent, setAccessToken, BookingData } from '../services/googleCalendar';
 import { createBooking } from '../services/bookingApi';
 import '../App.css';
 
 const Home: React.FC = () => {
     const [currentView, setCurrentView] = useState<'hero' | 'booking' | 'confirmation'>('hero');
     const [bookingData, setBookingData] = useState<BookingData | null>(null);
-    const [isGoogleInitialized, setIsGoogleInitialized] = useState<boolean>(false);
     const [isAddingToCalendar, setIsAddingToCalendar] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Initialize Google API client on mount
-    useEffect(() => {
-        const initializeGoogle = async () => {
-            try {
-                await initGoogleClient();
-                setIsGoogleInitialized(true);
-            } catch (error) {
-                console.error('Failed to initialize Google Calendar:', error);
-                setError('Failed to connect to Google Calendar services');
-            }
-        };
-
-        initializeGoogle();
-    }, []);
 
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
                 setIsAddingToCalendar(true);
-                // Set the access token for gapi client
+                // Set the access token for the service
                 setAccessToken(tokenResponse.access_token);
 
                 if (bookingData) {
@@ -94,10 +78,6 @@ const Home: React.FC = () => {
     };
 
     const handleAddToCalendar = () => {
-        if (!isGoogleInitialized) {
-            setError('Google Calendar is not initialized. Please refresh the page and try again.');
-            return;
-        }
         login();
     };
 

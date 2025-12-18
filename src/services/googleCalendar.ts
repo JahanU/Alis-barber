@@ -1,5 +1,4 @@
-import { gapi } from 'gapi-script';
-import { GOOGLE_CONFIG, CALENDAR_SETTINGS } from '../config/calendar';
+import { CALENDAR_SETTINGS } from '../config/calendar';
 
 export interface BookingData {
     date: string;
@@ -10,39 +9,23 @@ export interface BookingData {
     service: string;
 }
 
-/**
- * Initialize the Google API client (only the client, not auth2)
- */
-export const initGoogleClient = (): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        gapi.load('client', async () => {
-            try {
-                console.log('Initializing Google Client...');
-                await gapi.client.init({
-                    // clientId is not needed for client.init in the new model, 
-                    // but we need discovery docs
-                    discoveryDocs: GOOGLE_CONFIG.discoveryDocs,
-                });
-                resolve();
-            } catch (error) {
-                console.error('Error initializing Google API client:', error);
-                reject(error);
-            }
-        });
-    });
-};
+let googleAccessToken: string | null = null;
 
 /**
- * Set the access token for the Google API client
+ * Set the access token for Google API calls
  */
 export const setAccessToken = (token: string) => {
-    gapi.client.setToken({ access_token: token });
+    googleAccessToken = token;
 };
 
 /**
- * Create a calendar event
+ * Create a calendar event using Fetch API
  */
 export const createCalendarEvent = async (bookingData: BookingData): Promise<any> => {
+    if (!googleAccessToken) {
+        throw new Error('No access token found. Please sign in again.');
+    }
+
     try {
         const { date, timeSlot, customerName, customerEmail, customerPhone, service } = bookingData;
 
@@ -98,14 +81,25 @@ Thank you for booking with us!
             colorId: '5', // Yellow/Gold color for barber appointments
         };
 
-        // Insert the event
-        const response = await gapi.client.calendar.events.insert({
-            calendarId: CALENDAR_SETTINGS.calendarId,
-            resource: event,
-            sendUpdates: 'all', // Send email notifications to attendees
-        } as any);
+        const response = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_SETTINGS.calendarId}/events?sendUpdates=all`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${googleAccessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(event),
+            }
+        );
 
-        return response.result;
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Google API Error:', errorData);
+            throw new Error(errorData.error?.message || 'Failed to create calendar event');
+        }
+
+        return await response.json();
     } catch (error) {
         console.error('Error creating calendar event:', error);
         throw new Error('Failed to create calendar event. Please try again.');
