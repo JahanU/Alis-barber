@@ -18,32 +18,45 @@ export const handler: Handler = async (event) => {
     }
 
     try {
-        let serviceAccount: any;
+        let serviceAccount: { client_email?: string; private_key?: string } = {};
 
-        // Priority 1: Check for GOOGLE_SERVICE_ACCOUNT environment variable (Production)
-        if (process.env.GOOGLE_SERVICE_ACCOUNT) {
+        // Priority 1: Check for individual environment variables (Most user-friendly for Netlify)
+        if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+            serviceAccount = {
+                client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                // Ensure private key handles escaped newlines correctly if passed as a string
+                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            };
+        }
+        // Priority 2: Check for GOOGLE_SERVICE_ACCOUNT environment variable (JSON blob)
+        else if (process.env.GOOGLE_SERVICE_ACCOUNT) {
             try {
-                serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-                if (!serviceAccount.private_key || !serviceAccount.client_email) {
-                    throw new Error('GOOGLE_SERVICE_ACCOUNT env var is missing required fields (private_key or client_email)');
-                }
+                const parsed = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+                serviceAccount = {
+                    client_email: parsed.client_email,
+                    private_key: parsed.private_key,
+                };
             } catch (e) {
                 console.error('Failed to parse GOOGLE_SERVICE_ACCOUNT env var:', e);
                 throw new Error('GOOGLE_SERVICE_ACCOUNT environment variable is not valid JSON');
             }
         }
-        // Priority 2: Fall back to local service-account.json file (Local Dev)
+        // Priority 3: Fall back to local service-account.json file (Local Dev)
         else {
             const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
             if (fs.existsSync(serviceAccountPath)) {
-                serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+                const fileContent = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+                serviceAccount = {
+                    client_email: fileContent.client_email,
+                    private_key: fileContent.private_key,
+                };
             } else {
-                throw new Error('Google Credentials not found. Please set the GOOGLE_SERVICE_ACCOUNT env var or provide a service-account.json file.');
+                throw new Error('Google Credentials not found. Please set GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY in Netlify.');
             }
         }
 
-        if (!serviceAccount.private_key) {
-            throw new Error('Invalid Service Account credentials. Missing "private_key".');
+        if (!serviceAccount.private_key || !serviceAccount.client_email) {
+            throw new Error('Invalid Google Credentials. Missing "private_key" or "client_email".');
         }
 
 
