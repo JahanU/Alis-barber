@@ -22,6 +22,7 @@ const SERVICES: Service[] = [
 interface BookingFormProps {
     onSubmit: (data: BookingData) => void;
     onCancel: () => void;
+    isSubmitting?: boolean;
 }
 
 interface FormData {
@@ -33,13 +34,13 @@ interface FormData {
     timeSlot: string;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel }) => {
+const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel, isSubmitting = false }) => {
     const [formData, setFormData] = useState<FormData>({
         customerName: '',
         customerEmail: '',
         customerPhone: '',
         service: '',
-        date: '',
+        date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
         timeSlot: '',
     });
 
@@ -233,8 +234,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel }) => {
                     <button type="button" className="btn btn-secondary" onClick={onCancel}>
                         Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary">
-                        Confirm Booking
+                    <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                        {isSubmitting ? 'Confirming...' : 'Confirm Booking'}
                     </button>
                 </div>
             </form>

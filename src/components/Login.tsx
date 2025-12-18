@@ -9,7 +9,6 @@ const Login: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // Placeholder for login logic
-        console.log('Login attempt:', { email, password });
         alert('Login functionality coming soon!');
     };
 
