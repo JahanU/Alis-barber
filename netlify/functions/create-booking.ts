@@ -11,23 +11,17 @@ export const handler: Handler = async (event) => {
     }
 
     try {
-        // Read service account from file system using process.cwd()
-        const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
-        console.log('Reading service account from:', serviceAccountPath);
 
         if (!fs.existsSync(serviceAccountPath)) {
             throw new Error(`Service account file not found at ${serviceAccountPath}`);
         }
 
         const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-        console.log('Service Account Keys:', Object.keys(serviceAccount));
 
         if (!serviceAccount.private_key) {
             throw new Error('Invalid Service Account file. Missing "private_key". Did you download the OAuth Client ID instead of the Service Account Key?');
         }
 
-        console.log('Client Email:', serviceAccount.client_email);
-        console.log('Private Key Length:', serviceAccount.private_key ? serviceAccount.private_key.length : 0);
 
         const bookingData = JSON.parse(event.body || '{}');
         const { date, timeSlot, customerName, customerEmail, customerPhone, service } = bookingData;
