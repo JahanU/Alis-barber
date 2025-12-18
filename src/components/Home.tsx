@@ -4,6 +4,7 @@ import Hero from './Hero';
 import Gallery from './Gallery';
 import BookingForm from './BookingForm';
 import ConfirmationModal from './ConfirmationModal';
+import ShopInfo from './ShopInfo';
 import { useGoogleLogin } from '@react-oauth/google';
 import { createCalendarEvent, setAccessToken, BookingData } from '../services/googleCalendar';
 import { createBooking } from '../services/bookingApi';
@@ -96,6 +97,7 @@ const Home: React.FC = () => {
                 <>
                     <Hero onBookNow={handleBookNowClick} />
                     <Gallery />
+                    <ShopInfo />
                 </>
             )}
 
@@ -122,10 +124,11 @@ const Home: React.FC = () => {
 
             <footer className="app-footer">
                 <div className="container">
-                    <p>© 2024 Ali's Barbers. Premium barbering services.</p>
+                    <p>© {new Date().getFullYear()} Ali's Barbers. Premium barbering services.</p>
+                    <p>Created by Boka</p>
                 </div>
-            </footer>
-        </div>
+            </footer >
+        </div >
     );
 };
 

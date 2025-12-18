@@ -1,0 +1,110 @@
+.shop-info {
+    padding: 80px 0;
+    background-color: var(--card-bg);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shop-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+}
+
+.info-card h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.location-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.location-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-color);
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.address {
+    font-size: 1.4rem;
+    line-height: 1.4;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    /* Better readability */
+}
+
+.click-hint {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.location-card:hover .click-hint {
+    opacity: 1;
+}
+
+.hours-table {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hours-row {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hours-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.day {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.time {
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .shop-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card {
+        padding: 30px;
+    }
+}
