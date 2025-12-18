@@ -87,7 +87,6 @@ Thank you for booking with us!
             },
             attendees: [
                 { email: customerEmail },
-                { email: CALENDAR_SETTINGS.barberEmail },
             ],
             reminders: {
                 useDefault: false,

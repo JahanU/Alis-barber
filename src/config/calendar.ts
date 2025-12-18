@@ -20,7 +20,6 @@ export const GOOGLE_CONFIG: GoogleConfig = {
 // Calendar event settings
 export interface CalendarSettings {
   calendarId: string;
-  barberEmail: string;
   eventDuration: number;
   businessHours: {
     start: number;
@@ -32,9 +31,6 @@ export interface CalendarSettings {
 export const CALENDAR_SETTINGS: CalendarSettings = {
   // Calendar to add events to - 'primary' means the user's main calendar
   calendarId: 'primary',
-
-  // Barber's email for notifications (will be added as attendee)
-  barberEmail: import.meta.env.VITE_BARBER_EMAIL || '',
 
   // Event duration in hours
   eventDuration: 1,

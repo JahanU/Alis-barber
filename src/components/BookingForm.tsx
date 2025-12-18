@@ -36,10 +36,10 @@ interface FormData {
 
 const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel, isSubmitting = false }) => {
     const [formData, setFormData] = useState<FormData>({
-        customerName: 'Customer Name',
-        customerEmail: 'Customer Email',
-        customerPhone: '12312312',
-        service: 'haircut',
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        service: '',
         date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
         timeSlot: '',
     });
