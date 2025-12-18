@@ -71,7 +71,7 @@ export const handler: Handler = async (event) => {
         };
 
         const response = await calendar.events.insert({
-            calendarId: process.env.VITE_BARBER_CALENDAR_ID || 'Jahanulhaque@gmail.com', // Use env var or fallback
+            calendarId: process.env.BARBER_CALENDAR_ID || '',
             requestBody: calendarEvent,
             sendUpdates: 'all',
         });

@@ -29,8 +29,8 @@ export interface CalendarSettings {
 }
 
 export const CALENDAR_SETTINGS: CalendarSettings = {
-  // Calendar to add events to
-  calendarId: import.meta.env.VITE_BARBER_CALENDAR_ID || 'primary',
+  // Calendar to add events to - 'primary' means the user's main calendar
+  calendarId: 'primary',
 
   // Event duration in hours
   eventDuration: 1,
