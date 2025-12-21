@@ -49,8 +49,6 @@ export const handler: Handler = async (event) => {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL.trim(),
                 private_key: finalKey,
             };
-
-            console.log('Using Environment Variables for Authentication');
         }
         // Priority 2: Fall back to local service-account.json file (Local Dev)
         else {
@@ -61,10 +59,6 @@ export const handler: Handler = async (event) => {
                     client_email: fileContent.client_email,
                     private_key: fileContent.private_key,
                 };
-                console.log('Using local service-account.json for Authentication');
-                if (serviceAccount.private_key) {
-                    console.log(`Local File Key Stats: length=${serviceAccount.private_key.length}, lines=${serviceAccount.private_key.split('\n').length}`);
-                }
             } else {
                 throw new Error('Google Credentials not found. Please set GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY in Netlify.');
             }
@@ -118,7 +112,7 @@ export const handler: Handler = async (event) => {
 
         const calendarId = process.env.BARBER_CALENDAR_ID || 'primary';
 
-        console.log(`Attempting to insert event into calendar: ${calendarId}`);
+        console.log(`Attempting to insert event into calendar: ${calendarId} for customer: ${customerEmail}`);
 
         try {
             const response = await calendar.events.insert({
