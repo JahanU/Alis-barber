@@ -40,7 +40,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel, isSubmitt
         customerEmail: '',
         customerPhone: '',
         service: '',
-        date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+        date: new Date(Date.now()).toISOString().split('T')[0],
         timeSlot: '',
     });
 

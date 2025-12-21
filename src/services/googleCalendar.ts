@@ -116,11 +116,20 @@ Thank you for booking with us!
 /**
  * Get available time slots for a given date
  */
-export const getAvailableTimeSlots = (_date: Date): string[] => {
+export const getAvailableTimeSlots = (selectedDate: Date): string[] => {
     const slots: string[] = [];
     const { start, end } = CALENDAR_SETTINGS.businessHours;
 
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    const currentHour = now.getHours();
+
     for (let hour = start; hour < end; hour++) {
+        // If it's today, only include slots that haven't passed yet
+        if (isToday && hour <= currentHour) {
+            continue;
+        }
+
         const period = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
         slots.push(`${displayHour}:00 ${period}`);

@@ -26,7 +26,7 @@
 
 .time-slots-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: 1fr;
     gap: var(--spacing-sm);
 }
 
@@ -93,8 +93,7 @@
 /* Responsive */
 @media (max-width: 768px) {
     .time-slots-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        /* More compact grid */
+        grid-template-columns: 1fr;
         gap: var(--spacing-xs);
     }
 
