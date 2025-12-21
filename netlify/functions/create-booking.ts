@@ -50,23 +50,9 @@ export const handler: Handler = async (event) => {
                 private_key: finalKey,
             };
 
-            // Safety Diagnostics
-            console.log(`Key Reconstructed: length=${finalKey.length}, lines=${finalKey.split('\n').length}`);
+            console.log('Using Environment Variables for Authentication');
         }
-        // Priority 2: Check for GOOGLE_SERVICE_ACCOUNT environment variable (JSON blob)
-        else if (process.env.GOOGLE_SERVICE_ACCOUNT) {
-            try {
-                const parsed = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-                serviceAccount = {
-                    client_email: parsed.client_email,
-                    private_key: parsed.private_key,
-                };
-            } catch (e) {
-                console.error('Failed to parse GOOGLE_SERVICE_ACCOUNT env var:', e);
-                throw new Error('GOOGLE_SERVICE_ACCOUNT environment variable is not valid JSON');
-            }
-        }
-        // Priority 3: Fall back to local service-account.json file (Local Dev)
+        // Priority 2: Fall back to local service-account.json file (Local Dev)
         else {
             const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
             if (fs.existsSync(serviceAccountPath)) {
@@ -75,6 +61,10 @@ export const handler: Handler = async (event) => {
                     client_email: fileContent.client_email,
                     private_key: fileContent.private_key,
                 };
+                console.log('Using local service-account.json for Authentication');
+                if (serviceAccount.private_key) {
+                    console.log(`Local File Key Stats: length=${serviceAccount.private_key.length}, lines=${serviceAccount.private_key.split('\n').length}`);
+                }
             } else {
                 throw new Error('Google Credentials not found. Please set GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY in Netlify.');
             }
