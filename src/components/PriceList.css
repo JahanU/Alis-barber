@@ -1,0 +1,123 @@
+.price-list-container {
+    padding: var(--spacing-xl) 0;
+    animation: fadeIn var(--transition-slow);
+}
+
+.price-list-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.price-list-header h2 {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+    letter-spacing: -1px;
+}
+
+.price-list-header p {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}
+
+.price-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.service-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.section-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin: var(--spacing-sm) 0 var(--spacing-lg);
+    font-style: italic;
+    line-height: 1.4;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.price-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
+}
+
+.price-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.price-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.service-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.service-title {
+    font-size: 1.4rem;
+    color: var(--color-text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.service-description {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.service-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.service-cost {
+    font-size: 1.6rem;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.service-time {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+    .price-list-header h2 {
+        font-size: 2rem;
+    }
+}

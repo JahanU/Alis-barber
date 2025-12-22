@@ -1,7 +1,6 @@
-import React from 'react';
 import './ShopInfo.css';
 
-const ShopInfo: React.FC = () => {
+function ShopInfo() {
     const hours = [
         { day: 'Monday', time: '9 am – 6 pm' },
         { day: 'Tuesday', time: '9 am – 6 pm' },

@@ -1,4 +1,3 @@
-import React from 'react';
 import './Gallery.css';
 
 interface GalleryItem {
@@ -49,7 +48,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
 
 
 
-const Gallery: React.FC = () => {
+function Gallery() {
     return (
         <section className="gallery">
             <div className="container">

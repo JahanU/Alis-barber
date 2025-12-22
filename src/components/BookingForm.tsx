@@ -1,23 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import TimeSlotPicker from './TimeSlotPicker';
 import { getAvailableTimeSlots } from '../services/googleCalendar';
 import './BookingForm.css';
 
 import { BookingData } from '../services/googleCalendar';
 
-interface Service {
-    id: string;
-    name: string;
-    duration: string;
-    price: string;
-}
-
-const SERVICES: Service[] = [
-    { id: 'haircut', name: 'Classic Haircut', duration: '1 hour', price: '£25' },
-    { id: 'beard', name: 'Beard Trim & Shape', duration: '1 hour', price: '£15' },
-    { id: 'full', name: 'Full Service (Haircut + Beard)', duration: '1 hour', price: '£35' },
-    { id: 'shave', name: 'Hot Towel Shave', duration: '1 hour', price: '£20' },
-];
+import { SERVICES } from '../config/calendar';
 
 interface BookingFormProps {
     onSubmit: (data: BookingData) => void;
@@ -34,7 +22,7 @@ interface FormData {
     timeSlot: string;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ onSubmit, onCancel, isSubmitting = false }) => {
+function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
         customerName: '',
         customerEmail: '',

@@ -1,0 +1,122 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import BookingForm from './BookingForm';
+import ConfirmationModal from './ConfirmationModal';
+import { useGoogleLogin } from '@react-oauth/google';
+import { BookingData } from '../services/googleCalendar';
+
+function BookingPage() {
+    const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [bookingData, setBookingData] = useState<BookingData | null>(null);
+    const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleBookingSubmit = async (formData: BookingData) => {
+        try {
+            setIsSubmitting(true);
+            setError(null);
+            const response = await fetch('/.netlify/functions/create-booking', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create booking');
+            }
+
+            setBookingData(formData);
+        } catch (err: any) {
+            console.error('Booking error:', err);
+            setError(err.message || 'An unexpected error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                setIsAddingToCalendar(true);
+
+                const startTime = new Date(bookingData!.date);
+                const [time, period] = bookingData!.timeSlot.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                else if (period === 'AM' && hours === 12) hours = 0;
+                startTime.setHours(hours, minutes || 0, 0, 0);
+
+                const endTime = new Date(startTime);
+                endTime.setHours(startTime.getHours() + 1);
+
+                const event = {
+                    summary: `Barber Appointment - ${bookingData!.service}`,
+                    description: `Classic haircut appointment at Ali Barbers`,
+                    start: { dateTime: startTime.toISOString() },
+                    end: { dateTime: endTime.toISOString() },
+                };
+
+                const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${tokenResponse.access_token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(event),
+                });
+
+                if (response.ok) {
+                    alert('Successfully added to your Google Calendar!');
+                } else {
+                    throw new Error('Failed to add to calendar');
+                }
+            } catch (err) {
+                console.error('Calendar error:', err);
+                alert('Heads up: Booking was successful, but we couldn\'t add it to your calendar.');
+            } finally {
+                setIsAddingToCalendar(false);
+                setBookingData(null);
+                navigate('/');
+            }
+        },
+        scope: 'https://www.googleapis.com/auth/calendar.events',
+    });
+
+    return (
+        <div className="booking-page-wrapper">
+            {error && (
+                <div className="error-banner">
+                    <div className="container">
+                        <span>{error}</span>
+                        <button onClick={() => setError(null)}>&times;</button>
+                    </div>
+                </div>
+            )}
+
+            <div className="booking-view">
+                <div className="container">
+                    <BookingForm
+                        onSubmit={handleBookingSubmit}
+                        onCancel={() => navigate('/')}
+                        isSubmitting={isSubmitting}
+                    />
+                </div>
+            </div>
+
+            {bookingData && (
+                <ConfirmationModal
+                    bookingDetails={bookingData}
+                    onClose={() => {
+                        setBookingData(null);
+                        navigate('/');
+                    }}
+                    onAddToCalendar={() => googleLogin()}
+                    isAddingToCalendar={isAddingToCalendar}
+                />
+            )}
+        </div>
+    );
+};
+
+export default BookingPage;

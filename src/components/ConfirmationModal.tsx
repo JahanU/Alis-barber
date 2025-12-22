@@ -1,4 +1,3 @@
-import React from 'react';
 import './ConfirmationModal.css';
 
 import { BookingData } from '../services/googleCalendar';
@@ -10,7 +9,7 @@ interface ConfirmationModalProps {
     isAddingToCalendar: boolean;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ bookingDetails, onClose, onAddToCalendar, isAddingToCalendar }) => {
+function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingToCalendar }: ConfirmationModalProps) {
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             weekday: 'long',

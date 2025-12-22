@@ -1,4 +1,3 @@
-import React from 'react';
 import './TimeSlotPicker.css';
 
 interface TimeSlotPickerProps {
@@ -8,7 +7,7 @@ interface TimeSlotPickerProps {
     availableSlots: string[];
 }
 
-const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({ selectedDate, selectedSlot, onSlotSelect, availableSlots }) => {
+function TimeSlotPicker({ selectedDate, selectedSlot, onSlotSelect, availableSlots }: TimeSlotPickerProps) {
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('en-US', {
             weekday: 'long',

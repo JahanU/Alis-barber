@@ -1,11 +1,8 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
-interface HeroProps {
-    onBookNow: () => void;
-}
-
-const Hero: React.FC<HeroProps> = ({ onBookNow }) => {
+function Hero() {
+    const navigate = useNavigate();
     return (
         <section className="hero">
             <div className="hero-background">
@@ -24,12 +21,20 @@ const Hero: React.FC<HeroProps> = ({ onBookNow }) => {
                         Book your appointment in seconds and let us transform your look.
                     </p>
 
-                    <button className="btn btn-primary btn-large" onClick={onBookNow}>
-                        <span>Book Your Appointment</span>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </button>
+                    <div className="hero-actions">
+                        <button className="btn btn-primary btn-large" onClick={() => navigate('/book')}>
+                            <span>Book Your Appointment</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                        <button className="btn btn-secondary btn-large" onClick={() => navigate('/prices')}>
+                            <span>Prices</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M9 15L14 10L9 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div className="hero-features slide-up">
