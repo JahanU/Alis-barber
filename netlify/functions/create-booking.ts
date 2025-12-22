@@ -20,48 +20,14 @@ export const handler: Handler = async (event) => {
     try {
         let serviceAccount: { client_email?: string; private_key?: string } = {};
 
-        // Priority 1: Check for individual environment variables (Most user-friendly for Netlify)
         if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
-            let rawKey = process.env.GOOGLE_PRIVATE_KEY.trim();
-
-            // Fix: Strip surrounding quotes
-            if ((rawKey.startsWith('"') && rawKey.endsWith('"')) || (rawKey.startsWith("'") && rawKey.endsWith("'"))) {
-                rawKey = rawKey.substring(1, rawKey.length - 1);
-            }
-
-            // Bulletproof Reconstruction:
-            // 1. Remove the header and footer temporarily
-            // 2. Remove ALL whitespace/newlines from the actual key data
-            // 3. Re-wrap into 64-character lines (PEM Standard)
-            const header = "-----BEGIN PRIVATE KEY-----";
-            const footer = "-----END PRIVATE KEY-----";
-
-            let keyBody = rawKey
-                .replace(header, "")
-                .replace(footer, "")
-                .replace(/\\n/g, "")
-                .replace(/\s+/g, "");
-
-            const wrappedBody = keyBody.match(/.{1,64}/g)?.join('\n');
-            const finalKey = `${header}\n${wrappedBody}\n${footer}\n`;
-
             serviceAccount = {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL.trim(),
-                private_key: finalKey,
+                client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
             };
         }
-        // Priority 2: Fall back to local service-account.json file (Local Dev)
         else {
-            const serviceAccountPath = path.resolve(process.cwd(), 'service-account.json');
-            if (fs.existsSync(serviceAccountPath)) {
-                const fileContent = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-                serviceAccount = {
-                    client_email: fileContent.client_email,
-                    private_key: fileContent.private_key,
-                };
-            } else {
-                throw new Error('Google Credentials not found. Please set GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY in Netlify.');
-            }
+            throw new Error('Google Credentials not found. Please set GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY in Netlify.');
         }
 
         if (!serviceAccount.private_key || !serviceAccount.client_email) {
