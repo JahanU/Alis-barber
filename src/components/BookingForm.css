@@ -155,6 +155,7 @@ select.error {
 input[type="date"] {
     position: relative;
     cursor: pointer;
+    appearance: none;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
