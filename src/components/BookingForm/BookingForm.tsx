@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import TimeSlotPicker from './TimeSlotPicker';
-import { getAvailableTimeSlots } from '../services/googleCalendar';
 import './BookingForm.css';
+import { SERVICES } from '../../config/calendar';
+import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
+import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 
-import { BookingData } from '../services/googleCalendar';
 
-import { SERVICES } from '../config/calendar';
 
 interface BookingFormProps {
     onSubmit: (data: BookingData) => void;

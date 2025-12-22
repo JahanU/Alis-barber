@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BookingForm from './BookingForm';
-import ConfirmationModal from './ConfirmationModal';
 import { useGoogleLogin } from '@react-oauth/google';
-import { BookingData } from '../services/googleCalendar';
+import BookingForm from '../../components/BookingForm/BookingForm';
+import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
+import { BookingData } from '../../services/googleCalendar';
 
 function BookingPage() {
     const navigate = useNavigate();

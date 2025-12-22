@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { SERVICES } from '../config/calendar';
 import './PriceList.css';
+import { SERVICES } from '../../config/calendar';
 
 function PriceList() {
     const navigate = useNavigate();

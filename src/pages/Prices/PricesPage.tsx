@@ -1,4 +1,4 @@
-import PriceList from './PriceList';
+import PriceList from "../../components/PriceList/PriceList";
 
 function PricesPage() {
     return (
