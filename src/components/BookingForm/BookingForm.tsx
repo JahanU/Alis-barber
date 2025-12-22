@@ -19,6 +19,7 @@ interface FormData {
     service: string;
     date: string;
     timeSlot: string;
+    payInStore: boolean;
 }
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
@@ -29,6 +30,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         service: '',
         date: new Date(Date.now()).toISOString().split('T')[0],
         timeSlot: '',
+        payInStore: false,
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -36,8 +38,8 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
     const availableSlots = formData.date ? getAvailableTimeSlots(new Date(formData.date)) : [];
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
         // Clear error for this field
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
@@ -156,6 +158,18 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             />
                             {errors.customerPhone && <span className="error-message">{errors.customerPhone}</span>}
                         </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="checkbox-container">
+                            <input
+                                type="checkbox"
+                                name="payInStore"
+                                checked={formData.payInStore}
+                                onChange={handleInputChange}
+                            />
+                            <span className="checkbox-label">Pay in store</span>
+                        </label>
                     </div>
                 </div>
 
