@@ -26,7 +26,7 @@ export const STRIPE_CONFIG: StripeConfig = {
 
     // Checkout URL - Payment Link from Stripe Dashboard
     checkoutUrl: isProduction
-        ? 'https://book.stripe.com/3cIfZabMQe143nYffgbjW00'  // Replace with actual live payment link
+        ? 'https://buy.stripe.com/bJeaEQcQU2im8Iic34bjW01'  // Replace with actual live payment link
         : 'https://book.stripe.com/test_5kQ4gz4URa9e1WZ9N81kA00',
 
     // Success redirect URL - automatically uses correct domain
