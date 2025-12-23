@@ -1,6 +1,6 @@
+import { BookingData } from '../../services/googleCalendar';
 import './ConfirmationModal.css';
 
-import { BookingData } from '../services/googleCalendar';
 
 interface ConfirmationModalProps {
     bookingDetails: BookingData;
