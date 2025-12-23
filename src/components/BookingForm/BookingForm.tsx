@@ -25,11 +25,11 @@ interface FormData {
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
-        customerName: 'Adam Nolan',
-        customerEmail: 'JahannU12@gmail.com',
-        customerPhone: '+44 7123 456789',
-        service: 'haircut',
-        date: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0],
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        service: '',
+        date: new Date(Date.now()).toISOString().split('T')[0],
         timeSlot: '',
         payInStore: false,
     });
