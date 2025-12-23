@@ -21,13 +21,13 @@ const isProduction = window.location.hostname !== 'localhost' &&
 export const STRIPE_CONFIG: StripeConfig = {
     // Publishable key - safe to expose in frontend code
     publishableKey: isProduction
-        ? 'pk_live_51ShCQg2cVSzlDC9ITW7JsxdPC9mJZqt3hHSyljQ4zkdKQL7af6gI8wseKnJU8ZUuseOibzp3B1Z3Wu5BNpsrIM6e002U0DPDS1'  // Replace with actual live key
+        ? 'pk_live_51ShCQg2cVSzlDC9ITW7JsxdPC9mJZqt3hHSyljQ4zkdKQL7af6gI8wseKnJU8ZUuseOibzp3B1Z3Wu5BNpsrIM6e002U0DPDS1'
         : 'pk_test_51ShCQoGpjba4drjSVwKH2A65Q904TMxWSQr0LaFLwGoPZLAgS3dAvntfLxuwfQh7Bb28vCl1D7Vg1e7ft4uWu8UY00G6ZJvcQt',
 
     // Checkout URL - Payment Link from Stripe Dashboard
     checkoutUrl: isProduction
-        ? 'https://buy.stripe.com/bJeaEQcQU2im8Iic34bjW01'  // Replace with actual live payment link
-        : 'https://book.stripe.com/test_5kQ4gz4URa9e1WZ9N81kA00',
+        ? 'https://book.stripe.com/test_5kQ4gz4URa9e1WZ9N81kA00'
+        : 'https://buy.stripe.com/bJeaEQcQU2im8Iic34bjW01',
 
     // Success redirect URL - automatically uses correct domain
     successUrl: `${window.location.origin}/book?payment=success`,
