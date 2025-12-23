@@ -3,6 +3,7 @@ import './BookingForm.css';
 import { SERVICES } from '../../config/calendar';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
+import { STRIPE_CONFIG } from '../../config/stripe';
 
 
 
@@ -24,11 +25,11 @@ interface FormData {
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        service: '',
-        date: new Date(Date.now()).toISOString().split('T')[0],
+        customerName: 'Adam Nolan',
+        customerEmail: 'JahannU12@gmail.com',
+        customerPhone: '+44 7123 456789',
+        service: 'haircut',
+        date: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0],
         timeSlot: '',
         payInStore: false,
     });
@@ -98,7 +99,14 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         e.preventDefault();
 
         if (validateForm()) {
-            onSubmit(formData);
+            if (formData.payInStore) {
+                // Pay in store: proceed with normal booking flow
+                onSubmit(formData);
+            } else {
+                // Stripe payment: store booking data and redirect to Stripe
+                sessionStorage.setItem('pendingBooking', JSON.stringify(formData));
+                window.location.href = STRIPE_CONFIG.checkoutUrl;
+            }
         }
     };
 

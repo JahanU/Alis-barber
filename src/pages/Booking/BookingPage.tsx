@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
@@ -12,7 +12,7 @@ function BookingPage() {
     const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleBookingSubmit = async (formData: BookingData) => {
+    const handleBookingSubmit = useCallback(async (formData: BookingData) => {
         try {
             setIsSubmitting(true);
             setError(null);
@@ -33,7 +33,28 @@ function BookingPage() {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, []);
+
+    // Handle return from Stripe payment
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+
+        if (paymentStatus === 'success') {
+            // Retrieve pending booking from sessionStorage
+            const pendingBookingStr = sessionStorage.getItem('pendingBooking');
+            if (pendingBookingStr) {
+                const pendingBooking = JSON.parse(pendingBookingStr);
+                sessionStorage.removeItem('pendingBooking');
+
+                // Clear URL params
+                window.history.replaceState({}, '', '/book');
+
+                // Submit the booking
+                handleBookingSubmit(pendingBooking);
+            }
+        }
+    }, [handleBookingSubmit]);
 
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
