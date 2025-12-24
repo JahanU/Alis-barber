@@ -7,8 +7,7 @@
  */
 import { Handler } from '@netlify/functions';
 import { google } from 'googleapis';
-import * as fs from 'fs';
-import * as path from 'path';
+import { BookingData } from '../../src/services/googleCalendar';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 
@@ -35,8 +34,8 @@ export const handler: Handler = async (event) => {
         }
 
 
-        const bookingData = JSON.parse(event.body || '{}');
-        const { date, timeSlot, customerName, customerEmail, customerPhone, service } = bookingData;
+        const bookingData: BookingData = JSON.parse(event.body || '{}');
+        const { date, timeSlot, customer, service } = bookingData;
 
         // Authenticate with Service Account using GoogleAuth
         const auth = new google.auth.GoogleAuth({
@@ -63,8 +62,8 @@ export const handler: Handler = async (event) => {
 
         // Create Event
         const calendarEvent = {
-            summary: `Barber Appointment - ${service}`,
-            description: `Customer: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone}\nService: ${service}`,
+            summary: `Barber Appointment - ${service.name}`,
+            description: `Customer: ${customer.name}\nEmail: ${customer.email}\nPhone: ${customer.phone}\nService: ${service.name}`,
             start: {
                 dateTime: startDateTime.toISOString(),
                 timeZone: 'Europe/London',
@@ -78,7 +77,7 @@ export const handler: Handler = async (event) => {
 
         const calendarId = process.env.BARBER_CALENDAR_ID || 'primary';
 
-        console.log(`Attempting to insert event into calendar: ${calendarId} for customer: ${customerEmail}`);
+        console.log(`Attempting to insert event into calendar: ${calendarId} for customer: ${customer.email}`);
 
         try {
             const response = await calendar.events.insert({

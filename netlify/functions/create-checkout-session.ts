@@ -6,6 +6,7 @@
  */
 import { Handler } from '@netlify/functions';
 import Stripe from 'stripe';
+import { BookingData } from '../../src/services/googleCalendar';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -18,16 +19,15 @@ export const handler: Handler = async (event) => {
     }
 
     try {
-        const bookingData = JSON.parse(event.body || '{}'); // Parse booking data from request body
-        const { service, date, timeSlot, customerName, customerEmail, customerPhone } = bookingData;
+        const bookingData: BookingData = JSON.parse(event.body || '{}'); // Parse booking data from request body
         // Validate required fields
-        if (!service || !date || !timeSlot || !customerName || !customerEmail) {
+        if (Object.keys(bookingData).length === 0 || Object.keys(bookingData.customer).length === 0 || Object.keys(bookingData.service).length === 0) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Missing required booking data' }),
             };
         }
-
+        const { service, date, timeSlot, customer } = bookingData;
         // Determine base URL (works in both local and production)
         const baseUrl = process.env.URL || 'http://localhost:8888';
         const price = Number(service.price.replace(/[^\d.]/g, ''));
@@ -49,12 +49,12 @@ export const handler: Handler = async (event) => {
             mode: 'payment',
             success_url: `${baseUrl}/book?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${baseUrl}/book`,
-            customer_email: customerEmail,
+            customer_email: customer.email,
             metadata: {
                 // Store booking data in session metadata for later retrieval
-                customerName,
-                customerEmail,
-                customerPhone,
+                customerName: customer.name,
+                customerEmail: customer.email,
+                customerPhone: customer.phone,
                 serviceId: service.id,
                 serviceName: service.name,
                 servicePrice: service.price,

@@ -43,20 +43,26 @@ export const handler: Handler = async (event) => {
 
         // Extract booking data from session metadata
         const bookingData = {
-            customerName: session.metadata?.customerName || '',
-            customerEmail: session.metadata?.customerEmail || session.customer_email || '',
-            customerPhone: session.metadata?.customerPhone || '',
-            serviceId: session.metadata?.serviceId || '',
-            serviceName: session.metadata?.serviceName || '',
-            servicePrice: session.metadata?.servicePrice || '',
-            serviceCategory: session.metadata?.serviceCategory || '',
+            customer: {
+                name: session.metadata?.customerName || '',
+                email: session.metadata?.customerEmail || session.customer_email || '',
+                phone: session.metadata?.customerPhone || '',
+            },
+            service: {
+                id: session.metadata?.serviceId || '',
+                name: session.metadata?.serviceName || '',
+                duration: session.metadata?.serviceDuration || '',
+                price: session.metadata?.servicePrice || '',
+                category: session.metadata?.serviceCategory || '',
+                description: session.metadata?.serviceDescription || '',
+            },
             date: session.metadata?.date || '',
             timeSlot: session.metadata?.timeSlot || '',
             payInStore: false, // Payment was made via Stripe
         };
 
         // Validate booking data
-        if (!bookingData.serviceId || !bookingData.date || !bookingData.timeSlot) {
+        if (Object.keys(bookingData).length === 0 || Object.keys(bookingData.customer).length === 0 || Object.keys(bookingData.service).length === 0) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({

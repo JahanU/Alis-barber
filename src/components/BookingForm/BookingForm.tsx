@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './BookingForm.css';
-import { Service, SERVICES } from '../../config/calendar';
+import { Customer, Service, SERVICES } from '../../config/calendar';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 
@@ -13,22 +13,22 @@ interface BookingFormProps {
 }
 
 interface FormData {
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
     date: string;
     timeSlot: string;
     payInStore: boolean;
+    customer: Customer,
     service: Service | undefined;
 }
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        service: undefined,
-        date: new Date(Date.now()).toISOString().split('T')[0],
+        customer: {
+            name: 'Adam',
+            email: 'adam@adam.com',
+            phone: '1234567890',
+        },
+        service: SERVICES[0],
+        date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         timeSlot: '',
         payInStore: false,
     });
@@ -40,7 +40,18 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const { name, value, type, checked } = e.target;
+        console.log(name, value, type, checked);
         setFormData(prev => {
+            if (name.startsWith('customer.')) {
+                const field = name.split('.')[1];
+                return {
+                    ...prev,
+                    customer: {
+                        ...prev.customer,
+                        [field]: value
+                    }
+                };
+            }
             if (name === 'service') {
                 return {
                     ...prev,
@@ -68,18 +79,18 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.customerName.trim()) {
-            newErrors.customerName = 'Name is required';
+        if (!formData.customer.name.trim()) {
+            newErrors['customer.name'] = 'Name is required';
         }
 
-        if (!formData.customerEmail.trim()) {
-            newErrors.customerEmail = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.customerEmail)) {
-            newErrors.customerEmail = 'Please enter a valid email';
+        if (!formData.customer.email.trim()) {
+            newErrors['customer.email'] = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.customer.email)) {
+            newErrors['customer.email'] = 'Please enter a valid email';
         }
 
-        if (!formData.customerPhone.trim()) {
-            newErrors.customerPhone = 'Phone number is required';
+        if (!formData.customer.phone.trim()) {
+            newErrors['customer.phone'] = 'Phone number is required';
         }
 
         if (!formData.service) {
@@ -112,7 +123,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         if (validateForm()) {
             if (formData.payInStore) {
                 // Pay in store: proceed with normal booking flow
-                onSubmit(formData);
+                onSubmit(formData as BookingData);
             } else {
                 // Stripe payment: create checkout session
                 try {
@@ -155,46 +166,46 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                     <h3>Personal Information</h3>
 
                     <div className="form-group">
-                        <label htmlFor="customerName">Full Name *</label>
+                        <label htmlFor="customer.name">Full Name *</label>
                         <input
                             type="text"
-                            id="customerName"
-                            name="customerName"
-                            value={formData.customerName}
+                            id="customer.name"
+                            name="customer.name"
+                            value={formData.customer.name}
                             onChange={handleInputChange}
                             placeholder="Adam Nolan"
-                            className={errors.customerName ? 'error' : ''}
+                            className={errors['customer.name'] ? 'error' : ''}
                         />
-                        {errors.customerName && <span className="error-message">{errors.customerName}</span>}
+                        {errors['customer.name'] && <span className="error-message">{errors['customer.name']}</span>}
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="customerEmail">Email *</label>
+                            <label htmlFor="customer.email">Email *</label>
                             <input
                                 type="email"
-                                id="customerEmail"
-                                name="customerEmail"
-                                value={formData.customerEmail}
+                                id="customer.email"
+                                name="customer.email"
+                                value={formData.customer.email}
                                 onChange={handleInputChange}
                                 placeholder="adam@gmail.com"
-                                className={errors.customerEmail ? 'error' : ''}
+                                className={errors['customer.email'] ? 'error' : ''}
                             />
-                            {errors.customerEmail && <span className="error-message">{errors.customerEmail}</span>}
+                            {errors['customer.email'] && <span className="error-message">{errors['customer.email']}</span>}
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="customerPhone">Phone *</label>
+                            <label htmlFor="customer.phone">Phone *</label>
                             <input
                                 type="tel"
-                                id="customerPhone"
-                                name="customerPhone"
-                                value={formData.customerPhone}
+                                id="customer.phone"
+                                name="customer.phone"
+                                value={formData.customer.phone}
                                 onChange={handleInputChange}
                                 placeholder="+44 7123 456789"
-                                className={errors.customerPhone ? 'error' : ''}
+                                className={errors['customer.phone'] ? 'error' : ''}
                             />
-                            {errors.customerPhone && <span className="error-message">{errors.customerPhone}</span>}
+                            {errors['customer.phone'] && <span className="error-message">{errors['customer.phone']}</span>}
                         </div>
                     </div>
 

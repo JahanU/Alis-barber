@@ -36,17 +36,17 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
                 <div className="booking-details">
                     <div className="detail-row">
                         <span className="detail-label">Name:</span>
-                        <span className="detail-value">{bookingDetails.customerName}</span>
+                        <span className="detail-value">{bookingDetails.customer.name}</span>
                     </div>
 
                     <div className="detail-row">
                         <span className="detail-label">Email:</span>
-                        <span className="detail-value">{bookingDetails.customerEmail}</span>
+                        <span className="detail-value">{bookingDetails.customer.email}</span>
                     </div>
 
                     <div className="detail-row">
                         <span className="detail-label">Phone:</span>
-                        <span className="detail-value">{bookingDetails.customerPhone}</span>
+                        <span className="detail-value">{bookingDetails.customer.phone}</span>
                     </div>
 
                     <div className="detail-row highlight">

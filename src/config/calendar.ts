@@ -14,6 +14,12 @@ export interface Service {
   category: 'inShop' | 'home';
 }
 
+export interface Customer {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 export const SERVICES: Service[] = [
   // In-Shop Services
   {
