@@ -20,14 +20,16 @@ export const handler: Handler = async (event) => {
 
     try {
         const bookingData: BookingData = JSON.parse(event.body || '{}'); // Parse booking data from request body
+        const { service, customer, bookingDetails } = bookingData;
+        const { date, timeSlot, payInStore } = bookingDetails || {};
+
         // Validate required fields
-        if (Object.keys(bookingData).length === 0 || Object.keys(bookingData.customer).length === 0 || Object.keys(bookingData.service).length === 0) {
+        if (Object.keys(bookingData).length === 0 || !bookingDetails || !service || !service.id || !customer || !customer.name || !customer.email) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: 'Missing required booking data' }),
             };
         }
-        const { service, date, timeSlot, customer } = bookingData;
         // Determine base URL (works in both local and production)
         const baseUrl = process.env.URL || 'http://localhost:8888';
         const price = Number(service.price.replace(/[^\d.]/g, ''));
@@ -59,8 +61,9 @@ export const handler: Handler = async (event) => {
                 serviceName: service.name,
                 servicePrice: service.price,
                 serviceCategory: service.category,
-                date,
-                timeSlot,
+                date: date,
+                timeSlot: timeSlot,
+                payInStore: String(payInStore),
             },
         });
 

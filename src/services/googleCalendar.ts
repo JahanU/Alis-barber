@@ -5,13 +5,12 @@
  * ACTIONS: Uses standard Fetch API to create events on the CUSTOMER'S primary calendar
  * after they have authenticated via Google OAuth.
  */
-import { CALENDAR_SETTINGS, Service, Customer } from '../config/calendar';
+import { CALENDAR_SETTINGS, Service, Customer, BookingDetails } from '../config/calendar';
 
 export interface BookingData {
-    date: string;
-    timeSlot: string;
     customer: Customer;
     service: Service;
+    bookingDetails: BookingDetails;
 }
 
 let googleAccessToken: string | null = null;
@@ -32,7 +31,8 @@ export const createCalendarEvent = async (bookingData: BookingData): Promise<any
     }
 
     try {
-        const { date, timeSlot, customer, service } = bookingData;
+        const { customer, service, bookingDetails } = bookingData;
+        const { date, timeSlot } = bookingDetails;
 
         // Parse the time slot to get hours and minutes
         const [time, period] = timeSlot.split(' ');

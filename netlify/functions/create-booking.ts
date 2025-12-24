@@ -35,7 +35,17 @@ export const handler: Handler = async (event) => {
 
 
         const bookingData: BookingData = JSON.parse(event.body || '{}');
-        const { date, timeSlot, customer, service } = bookingData;
+        const { customer, service, bookingDetails } = bookingData;
+        const { date, timeSlot } = bookingDetails || {};
+
+        // Validate required fields
+        if (!bookingDetails || !date || !timeSlot || !service || !service.name || !customer || !customer.name || !customer.email || !customer.phone) {
+            console.error('Missing required fields in booking data:', JSON.stringify(bookingData, null, 2));
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Missing required fields in booking data' })
+            };
+        }
 
         // Authenticate with Service Account using GoogleAuth
         const auth = new google.auth.GoogleAuth({

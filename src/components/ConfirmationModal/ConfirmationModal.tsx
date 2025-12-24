@@ -56,12 +56,12 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
 
                     <div className="detail-row highlight">
                         <span className="detail-label">Date:</span>
-                        <span className="detail-value">{formatDate(bookingDetails.date)}</span>
+                        <span className="detail-value">{formatDate(bookingDetails.bookingDetails.date)}</span>
                     </div>
 
                     <div className="detail-row highlight">
                         <span className="detail-label">Time:</span>
-                        <span className="detail-value">{bookingDetails.timeSlot}</span>
+                        <span className="detail-value">{bookingDetails.bookingDetails.timeSlot}</span>
                     </div>
                 </div>
 

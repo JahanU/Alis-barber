@@ -56,13 +56,15 @@ export const handler: Handler = async (event) => {
                 category: session.metadata?.serviceCategory || '',
                 description: session.metadata?.serviceDescription || '',
             },
-            date: session.metadata?.date || '',
-            timeSlot: session.metadata?.timeSlot || '',
-            payInStore: false, // Payment was made via Stripe
+            bookingDetails: {
+                date: session.metadata?.date || '',
+                timeSlot: session.metadata?.timeSlot || '',
+                payInStore: session.metadata?.payInStore === 'true',
+            }
         };
 
         // Validate booking data
-        if (Object.keys(bookingData).length === 0 || Object.keys(bookingData.customer).length === 0 || Object.keys(bookingData.service).length === 0) {
+        if (!bookingData.bookingDetails.date || !bookingData.bookingDetails.timeSlot) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({

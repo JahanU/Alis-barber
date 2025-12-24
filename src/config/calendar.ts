@@ -20,6 +20,12 @@ export interface Customer {
   phone: string;
 }
 
+export interface BookingDetails {
+  date: string;
+  timeSlot: string;
+  payInStore: boolean;
+}
+
 export const SERVICES: Service[] = [
   // In-Shop Services
   {

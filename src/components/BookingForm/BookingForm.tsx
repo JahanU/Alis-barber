@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './BookingForm.css';
-import { Customer, Service, SERVICES } from '../../config/calendar';
+import { Customer, Service, SERVICES, BookingDetails } from '../../config/calendar';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 
@@ -13,10 +13,8 @@ interface BookingFormProps {
 }
 
 interface FormData {
-    date: string;
-    timeSlot: string;
-    payInStore: boolean;
-    customer: Customer,
+    customer: Customer;
+    bookingDetails: BookingDetails;
     service: Service | undefined;
 }
 
@@ -27,13 +25,15 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
             email: 'adam@adam.com',
             phone: '1234567890',
         },
+        bookingDetails: {
+            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            timeSlot: '',
+            payInStore: false,
+        },
         service: SERVICES[0],
-        date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        timeSlot: '',
-        payInStore: false,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const availableSlots = formData.date ? getAvailableTimeSlots(new Date(formData.date)) : [];
+    const availableSlots = formData.bookingDetails.date ? getAvailableTimeSlots(new Date(formData.bookingDetails.date)) : [];
 
 
     const handleInputChange = (
@@ -49,6 +49,16 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                     customer: {
                         ...prev.customer,
                         [field]: value
+                    }
+                };
+            }
+            if (name.startsWith('bookingDetails.')) {
+                const field = name.split('.')[1];
+                return {
+                    ...prev,
+                    bookingDetails: {
+                        ...prev.bookingDetails,
+                        [field]: type === 'checkbox' ? checked : value
                     }
                 };
             }
@@ -70,9 +80,12 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
 
 
     const handleSlotSelect = (slot: string) => {
-        setFormData(prev => ({ ...prev, timeSlot: slot }));
-        if (errors.timeSlot) {
-            setErrors(prev => ({ ...prev, timeSlot: '' }));
+        setFormData(prev => ({
+            ...prev,
+            bookingDetails: { ...prev.bookingDetails, timeSlot: slot }
+        }));
+        if (errors['bookingDetails.timeSlot']) {
+            setErrors(prev => ({ ...prev, ['bookingDetails.timeSlot']: '' }));
         }
     };
 
@@ -97,20 +110,20 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
             newErrors.service = 'Please select a service';
         }
 
-        if (!formData.date) {
-            newErrors.date = 'Please select a date';
+        if (!formData.bookingDetails.date) {
+            newErrors['bookingDetails.date'] = 'Please select a date';
         } else {
-            const selectedDate = new Date(formData.date);
+            const selectedDate = new Date(formData.bookingDetails.date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             if (selectedDate < today) {
-                newErrors.date = 'Please select a future date';
+                newErrors['bookingDetails.date'] = 'Please select a future date';
             }
         }
 
-        if (!formData.timeSlot) {
-            newErrors.timeSlot = 'Please select a time slot';
+        if (!formData.bookingDetails.timeSlot) {
+            newErrors['bookingDetails.timeSlot'] = 'Please select a time slot';
         }
 
         setErrors(newErrors);
@@ -121,7 +134,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         e.preventDefault();
 
         if (validateForm()) {
-            if (formData.payInStore) {
+            if (formData.bookingDetails.payInStore) {
                 // Pay in store: proceed with normal booking flow
                 onSubmit(formData as BookingData);
             } else {
@@ -213,8 +226,8 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                         <label className="checkbox-container">
                             <input
                                 type="checkbox"
-                                name="payInStore"
-                                checked={formData.payInStore}
+                                name="bookingDetails.payInStore"
+                                checked={formData.bookingDetails.payInStore}
                                 onChange={handleInputChange}
                             />
                             <span className="checkbox-label">Pay in store</span>
@@ -258,26 +271,26 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                     <h3>Date & Time</h3>
 
                     <div className="form-group">
-                        <label htmlFor="date">Select Date *</label>
+                        <label htmlFor="bookingDetails.date">Select Date *</label>
                         <input
                             type="date"
-                            id="date"
-                            name="date"
-                            value={formData.date}
+                            id="bookingDetails.date"
+                            name="bookingDetails.date"
+                            value={formData.bookingDetails.date}
                             onChange={handleInputChange}
                             min={today}
-                            className={errors.date ? 'error' : ''}
+                            className={errors['bookingDetails.date'] ? 'error' : ''}
                         />
-                        {errors.date && <span className="error-message">{errors.date}</span>}
+                        {errors['bookingDetails.date'] && <span className="error-message">{errors['bookingDetails.date']}</span>}
                     </div>
 
                     <TimeSlotPicker
-                        selectedDate={formData.date}
-                        selectedSlot={formData.timeSlot}
+                        selectedDate={formData.bookingDetails.date}
+                        selectedSlot={formData.bookingDetails.timeSlot}
                         onSlotSelect={handleSlotSelect}
                         availableSlots={availableSlots}
                     />
-                    {errors.timeSlot && <span className="error-message">{errors.timeSlot}</span>}
+                    {errors['bookingDetails.timeSlot'] && <span className="error-message">{errors['bookingDetails.timeSlot']}</span>}
                 </div>
 
                 <div className="form-actions">
