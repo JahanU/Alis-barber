@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import './BookingForm.css';
-import { SERVICES } from '../../config/calendar';
+import { Service, SERVICES } from '../../config/calendar';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
-import { STRIPE_CONFIG } from '../../config/stripe';
 
 
 
@@ -17,10 +16,10 @@ interface FormData {
     customerName: string;
     customerEmail: string;
     customerPhone: string;
-    service: string;
     date: string;
     timeSlot: string;
     payInStore: boolean;
+    service: Service | undefined;
 }
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
@@ -28,24 +27,36 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         customerName: '',
         customerEmail: '',
         customerPhone: '',
-        service: '',
+        service: undefined,
         date: new Date(Date.now()).toISOString().split('T')[0],
         timeSlot: '',
         payInStore: false,
     });
-
     const [errors, setErrors] = useState<Record<string, string>>({});
-
     const availableSlots = formData.date ? getAvailableTimeSlots(new Date(formData.date)) : [];
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-        // Clear error for this field
+        setFormData(prev => {
+            if (name === 'service') {
+                return {
+                    ...prev,
+                    service: SERVICES.find(s => s.id === value) // id -> Service
+                };
+            }
+            return {
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            };
+        });
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
+
 
     const handleSlotSelect = (slot: string) => {
         setFormData(prev => ({ ...prev, timeSlot: slot }));
@@ -95,7 +106,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (validateForm()) {
@@ -103,9 +114,28 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                 // Pay in store: proceed with normal booking flow
                 onSubmit(formData);
             } else {
-                // Stripe payment: store booking data and redirect to Stripe
-                sessionStorage.setItem('pendingBooking', JSON.stringify(formData));
-                window.location.href = STRIPE_CONFIG.checkoutUrl;
+                // Stripe payment: create checkout session
+                try {
+                    const response = await fetch('/.netlify/functions/create-checkout-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to create checkout session');
+                    }
+
+                    const { url } = await response.json();
+
+                    // Redirect to Stripe Checkout
+                    window.location.href = url;
+                } catch (error) {
+                    console.error('Checkout error:', error);
+                    alert('Failed to start payment process. Please try again.');
+                }
             }
         }
     };
@@ -190,13 +220,13 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             {SERVICES.map(service => (
                                 <label
                                     key={service.id}
-                                    className={`service-card ${formData.service === service.id ? 'selected' : ''}`}
+                                    className={`service-card ${formData.service?.id === service.id ? 'selected' : ''}`}
                                 >
                                     <input
                                         type="radio"
                                         name="service"
                                         value={service.id}
-                                        checked={formData.service === service.id}
+                                        checked={formData.service?.id === service.id}
                                         onChange={handleInputChange}
                                     />
                                     <div className="service-content">

@@ -19,16 +19,6 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
         });
     };
 
-    const getServiceName = (serviceId: string) => {
-        const services: Record<string, string> = {
-            haircut: 'Classic Haircut',
-            beard: 'Beard Trim & Shape',
-            full: 'Full Service (Haircut + Beard)',
-            shave: 'Hot Towel Shave',
-        };
-        return services[serviceId] || serviceId;
-    };
-
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content glass-strong" onClick={(e) => e.stopPropagation()}>
@@ -61,7 +51,7 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
 
                     <div className="detail-row highlight">
                         <span className="detail-label">Service:</span>
-                        <span className="detail-value">{getServiceName(bookingDetails.service)}</span>
+                        <span className="detail-value">{bookingDetails.service.name}</span>
                     </div>
 
                     <div className="detail-row highlight">
