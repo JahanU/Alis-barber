@@ -73,8 +73,8 @@ function BookingPage() {
             try {
                 setIsAddingToCalendar(true);
 
-                const startTime = new Date(bookingData!.date);
-                const [time, period] = bookingData!.timeSlot.split(' ');
+                const startTime = new Date(bookingData!.bookingDetails.date);
+                const [time, period] = bookingData!.bookingDetails.timeSlot.split(' ');
                 let [hours, minutes] = time.split(':').map(Number);
                 if (period === 'PM' && hours !== 12) hours += 12;
                 else if (period === 'AM' && hours === 12) hours = 0;

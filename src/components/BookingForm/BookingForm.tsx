@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import './BookingForm.css';
-import { Customer, Service, SERVICES, BookingDetails } from '../../config/booking';
+import { Customer, BookingDetails, Service } from '../../config/booking-types';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
+import { SERVICES } from '../../config/services';
 
 
 
@@ -13,24 +14,31 @@ interface BookingFormProps {
 }
 
 interface FormData {
-    customer: Customer;
     bookingDetails: BookingDetails;
-    service: Service | undefined;
+    customer: Customer;
+    service: Service;
 }
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
-        customer: {
-            name: 'Adam',
-            email: 'adam@adam.com',
-            phone: '1234567890',
-        },
         bookingDetails: {
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            date: new Date().toISOString().split('T')[0],
             timeSlot: '',
             payInStore: false,
         },
-        service: SERVICES[0],
+        customer: {
+            name: '',
+            email: '',
+            phone: '',
+        },
+        service: {
+            id: '',
+            name: '',
+            price: '',
+            duration: '',
+            description: '',
+            category: 'inShop'
+        },
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const availableSlots = formData.bookingDetails.date ? getAvailableTimeSlots(new Date(formData.bookingDetails.date)) : [];
@@ -40,7 +48,6 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const { name, value, type, checked } = e.target;
-        console.log(name, value, type, checked);
         setFormData(prev => {
             if (name.startsWith('customer.')) {
                 const field = name.split('.')[1];
@@ -63,15 +70,15 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                 };
             }
             if (name === 'service') {
-                return {
-                    ...prev,
-                    service: SERVICES.find(s => s.id === value) // id -> Service
-                };
+                const selectedService = SERVICES.find(s => s.id === value);
+                if (selectedService) {
+                    return {
+                        ...prev,
+                        service: selectedService
+                    };
+                }
             }
-            return {
-                ...prev,
-                [name]: type === 'checkbox' ? checked : value
-            };
+            return prev;
         });
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
@@ -244,13 +251,13 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             {SERVICES.map(service => (
                                 <label
                                     key={service.id}
-                                    className={`service-card ${formData.service?.id === service.id ? 'selected' : ''}`}
+                                    className={`service-card ${formData.service.id === service.id ? 'selected' : ''}`}
                                 >
                                     <input
                                         type="radio"
                                         name="service"
                                         value={service.id}
-                                        checked={formData.service?.id === service.id}
+                                        checked={formData.service.id === service.id}
                                         onChange={handleInputChange}
                                     />
                                     <div className="service-content">

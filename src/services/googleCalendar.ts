@@ -6,7 +6,7 @@
  * after they have authenticated via Google OAuth.
  */
 import { CALENDAR_SETTINGS } from '../config/calendar';
-import { Service, Customer, BookingDetails } from '../config/booking';
+import { Service, Customer, BookingDetails } from '../config/booking-types';
 
 export interface BookingData {
     customer: Customer;
