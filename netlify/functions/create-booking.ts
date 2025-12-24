@@ -39,7 +39,7 @@ export const handler: Handler = async (event) => {
         const { date, timeSlot } = bookingDetails || {};
 
         // Validate required fields
-        if (!bookingDetails || !date || !timeSlot || !service || !service.name || !customer || !customer.name || !customer.email || !customer.phone) {
+        if (!customer?.email || !service?.id || !bookingDetails?.date) {
             console.error('Missing required fields in booking data:', JSON.stringify(bookingData, null, 2));
             return {
                 statusCode: 400,
