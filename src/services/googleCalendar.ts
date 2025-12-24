@@ -5,7 +5,8 @@
  * ACTIONS: Uses standard Fetch API to create events on the CUSTOMER'S primary calendar
  * after they have authenticated via Google OAuth.
  */
-import { CALENDAR_SETTINGS, Service, Customer, BookingDetails } from '../config/calendar';
+import { CALENDAR_SETTINGS } from '../config/calendar';
+import { Service, Customer, BookingDetails } from '../config/booking';
 
 export interface BookingData {
     customer: Customer;

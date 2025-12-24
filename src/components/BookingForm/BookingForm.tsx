@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './BookingForm.css';
-import { Customer, Service, SERVICES, BookingDetails } from '../../config/calendar';
+import { Customer, Service, SERVICES, BookingDetails } from '../../config/booking';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 
