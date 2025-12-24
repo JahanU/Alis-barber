@@ -23,4 +23,5 @@ export interface BookingDetails {
     date: string;
     timeSlot: string;
     payInStore: boolean;
+    stripePaymentPaid?: boolean; // If paid via stripe, I add this to the booking data
 }

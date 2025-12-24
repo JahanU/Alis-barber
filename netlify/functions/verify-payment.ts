@@ -60,6 +60,7 @@ export const handler: Handler = async (event) => {
                 date: session.metadata?.date || '',
                 timeSlot: session.metadata?.timeSlot || '',
                 payInStore: session.metadata?.payInStore === 'true',
+                stripePaymentPaid: session.payment_status === 'paid',
             }
         };
 

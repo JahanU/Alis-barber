@@ -49,6 +49,16 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
                         <span className="detail-value">{bookingDetails.customer.phone}</span>
                     </div>
 
+                    {!bookingDetails.bookingDetails.stripePaymentPaid && <div className="detail-row">
+                        <span className="detail-label">Pay In Store:</span>
+                        <span className="detail-value">{bookingDetails.bookingDetails.payInStore ? 'Yes' : 'No'}</span>
+                    </div>}
+
+                    {bookingDetails.bookingDetails?.stripePaymentPaid && <div className="detail-row">
+                        <span className="detail-label">Paid Online:</span>
+                        <span className="detail-value">{bookingDetails.bookingDetails?.stripePaymentPaid ? 'Yes' : 'No'}</span>
+                    </div>}
+
                     <div className="detail-row highlight">
                         <span className="detail-label">Service:</span>
                         <span className="detail-value">{bookingDetails.service.name}</span>
