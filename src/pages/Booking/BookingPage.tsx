@@ -11,6 +11,7 @@ function BookingPage() {
     const [bookingData, setBookingData] = useState<BookingData | null>(null);
     const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
 
     const handleBookingSubmit = useCallback(async (formData: BookingData) => {
         try {
@@ -38,21 +39,32 @@ function BookingPage() {
     // Handle return from Stripe payment
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
-        const paymentStatus = urlParams.get('payment');
+        const sessionId = urlParams.get('session_id');
 
-        if (paymentStatus === 'success') {
-            // Retrieve pending booking from sessionStorage
-            const pendingBookingStr = sessionStorage.getItem('pendingBooking');
-            if (pendingBookingStr) {
-                const pendingBooking = JSON.parse(pendingBookingStr);
-                sessionStorage.removeItem('pendingBooking');
+        if (sessionId) {
+            // Verify payment with backend
+            setIsVerifyingPayment(true);
 
-                // Clear URL params
-                window.history.replaceState({}, '', '/book');
+            fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.verified && data.bookingData) {
+                        // Clear URL params
+                        window.history.replaceState({}, '', '/book');
 
-                // Submit the booking
-                handleBookingSubmit(pendingBooking);
-            }
+                        // Payment confirmed - create booking
+                        handleBookingSubmit(data.bookingData);
+                    } else {
+                        setError(data.error || 'Payment verification failed. Please contact support.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Payment verification error:', err);
+                    setError('Failed to verify payment. Please contact support.');
+                })
+                .finally(() => {
+                    setIsVerifyingPayment(false);
+                });
         }
     }, [handleBookingSubmit]);
 
@@ -61,8 +73,8 @@ function BookingPage() {
             try {
                 setIsAddingToCalendar(true);
 
-                const startTime = new Date(bookingData!.date);
-                const [time, period] = bookingData!.timeSlot.split(' ');
+                const startTime = new Date(bookingData!.bookingDetails.date);
+                const [time, period] = bookingData!.bookingDetails.timeSlot.split(' ');
                 let [hours, minutes] = time.split(':').map(Number);
                 if (period === 'PM' && hours !== 12) hours += 12;
                 else if (period === 'AM' && hours === 12) hours = 0;
@@ -115,12 +127,20 @@ function BookingPage() {
                 </div>
             )}
 
+            {isVerifyingPayment && (
+                <div className="error-banner" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                    <div className="container">
+                        <span>🔒 Verifying payment...</span>
+                    </div>
+                </div>
+            )}
+
             <div className="booking-view">
                 <div className="container">
                     <BookingForm
                         onSubmit={handleBookingSubmit}
                         onCancel={() => navigate('/')}
-                        isSubmitting={isSubmitting}
+                        isSubmitting={isSubmitting || isVerifyingPayment}
                     />
                 </div>
             </div>

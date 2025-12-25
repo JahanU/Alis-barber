@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import './BookingForm.css';
-import { SERVICES } from '../../config/calendar';
+import { Customer, BookingDetails, Service } from '../../config/booking-types';
 import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
-import { STRIPE_CONFIG } from '../../config/stripe';
+import { SERVICES } from '../../config/services';
 
 
 
@@ -14,98 +14,159 @@ interface BookingFormProps {
 }
 
 interface FormData {
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
-    service: string;
-    date: string;
-    timeSlot: string;
-    payInStore: boolean;
+    bookingDetails: BookingDetails;
+    customer: Customer;
+    service: Service;
 }
 
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        service: '',
-        date: new Date(Date.now()).toISOString().split('T')[0],
-        timeSlot: '',
-        payInStore: false,
+        bookingDetails: {
+            date: new Date().toISOString().split('T')[0],
+            timeSlot: '',
+            payInStore: false,
+        },
+        customer: {
+            name: '',
+            email: '',
+            phone: '',
+        },
+        service: {
+            id: '',
+            name: '',
+            price: '',
+            duration: '',
+            description: '',
+            category: 'inShop'
+        },
     });
-
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const availableSlots = formData.bookingDetails.date ? getAvailableTimeSlots(new Date(formData.bookingDetails.date)) : [];
 
-    const availableSlots = formData.date ? getAvailableTimeSlots(new Date(formData.date)) : [];
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-        // Clear error for this field
+        setFormData(prev => {
+            if (name.startsWith('customer.')) {
+                const field = name.split('.')[1];
+                return {
+                    ...prev,
+                    customer: {
+                        ...prev.customer,
+                        [field]: value
+                    }
+                };
+            }
+            if (name.startsWith('bookingDetails.')) {
+                const field = name.split('.')[1];
+                return {
+                    ...prev,
+                    bookingDetails: {
+                        ...prev.bookingDetails,
+                        [field]: type === 'checkbox' ? checked : value
+                    }
+                };
+            }
+            if (name === 'service') {
+                const selectedService = SERVICES.find(s => s.id === value);
+                if (selectedService) {
+                    return {
+                        ...prev,
+                        service: selectedService
+                    };
+                }
+            }
+            return prev;
+        });
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
 
+
     const handleSlotSelect = (slot: string) => {
-        setFormData(prev => ({ ...prev, timeSlot: slot }));
-        if (errors.timeSlot) {
-            setErrors(prev => ({ ...prev, timeSlot: '' }));
+        setFormData(prev => ({
+            ...prev,
+            bookingDetails: { ...prev.bookingDetails, timeSlot: slot }
+        }));
+        if (errors['bookingDetails.timeSlot']) {
+            setErrors(prev => ({ ...prev, ['bookingDetails.timeSlot']: '' }));
         }
     };
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.customerName.trim()) {
-            newErrors.customerName = 'Name is required';
+        if (!formData.customer.name.trim()) {
+            newErrors['customer.name'] = 'Name is required';
         }
 
-        if (!formData.customerEmail.trim()) {
-            newErrors.customerEmail = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.customerEmail)) {
-            newErrors.customerEmail = 'Please enter a valid email';
+        if (!formData.customer.email.trim()) {
+            newErrors['customer.email'] = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(formData.customer.email)) {
+            newErrors['customer.email'] = 'Please enter a valid email';
         }
 
-        if (!formData.customerPhone.trim()) {
-            newErrors.customerPhone = 'Phone number is required';
+        if (!formData.customer.phone.trim()) {
+            newErrors['customer.phone'] = 'Phone number is required';
         }
 
         if (!formData.service) {
             newErrors.service = 'Please select a service';
         }
 
-        if (!formData.date) {
-            newErrors.date = 'Please select a date';
+        if (!formData.bookingDetails.date) {
+            newErrors['bookingDetails.date'] = 'Please select a date';
         } else {
-            const selectedDate = new Date(formData.date);
+            const selectedDate = new Date(formData.bookingDetails.date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             if (selectedDate < today) {
-                newErrors.date = 'Please select a future date';
+                newErrors['bookingDetails.date'] = 'Please select a future date';
             }
         }
 
-        if (!formData.timeSlot) {
-            newErrors.timeSlot = 'Please select a time slot';
+        if (!formData.bookingDetails.timeSlot) {
+            newErrors['bookingDetails.timeSlot'] = 'Please select a time slot';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (validateForm()) {
-            if (formData.payInStore) {
+            if (formData.bookingDetails.payInStore) {
                 // Pay in store: proceed with normal booking flow
-                onSubmit(formData);
+                onSubmit(formData as BookingData);
             } else {
-                // Stripe payment: store booking data and redirect to Stripe
-                sessionStorage.setItem('pendingBooking', JSON.stringify(formData));
-                window.location.href = STRIPE_CONFIG.checkoutUrl;
+                // Stripe payment: create checkout session
+                try {
+                    const response = await fetch('/.netlify/functions/create-checkout-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to create checkout session');
+                    }
+
+                    const { url } = await response.json();
+
+                    // Redirect to Stripe Checkout
+                    window.location.href = url;
+                } catch (error) {
+                    console.error('Checkout error:', error);
+                    alert('Failed to start payment process. Please try again.');
+                }
             }
         }
     };
@@ -125,46 +186,46 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                     <h3>Personal Information</h3>
 
                     <div className="form-group">
-                        <label htmlFor="customerName">Full Name *</label>
+                        <label htmlFor="customer.name">Full Name *</label>
                         <input
                             type="text"
-                            id="customerName"
-                            name="customerName"
-                            value={formData.customerName}
+                            id="customer.name"
+                            name="customer.name"
+                            value={formData.customer.name}
                             onChange={handleInputChange}
                             placeholder="Adam Nolan"
-                            className={errors.customerName ? 'error' : ''}
+                            className={errors['customer.name'] ? 'error' : ''}
                         />
-                        {errors.customerName && <span className="error-message">{errors.customerName}</span>}
+                        {errors['customer.name'] && <span className="error-message">{errors['customer.name']}</span>}
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="customerEmail">Email *</label>
+                            <label htmlFor="customer.email">Email *</label>
                             <input
                                 type="email"
-                                id="customerEmail"
-                                name="customerEmail"
-                                value={formData.customerEmail}
+                                id="customer.email"
+                                name="customer.email"
+                                value={formData.customer.email}
                                 onChange={handleInputChange}
                                 placeholder="adam@gmail.com"
-                                className={errors.customerEmail ? 'error' : ''}
+                                className={errors['customer.email'] ? 'error' : ''}
                             />
-                            {errors.customerEmail && <span className="error-message">{errors.customerEmail}</span>}
+                            {errors['customer.email'] && <span className="error-message">{errors['customer.email']}</span>}
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="customerPhone">Phone *</label>
+                            <label htmlFor="customer.phone">Phone *</label>
                             <input
                                 type="tel"
-                                id="customerPhone"
-                                name="customerPhone"
-                                value={formData.customerPhone}
+                                id="customer.phone"
+                                name="customer.phone"
+                                value={formData.customer.phone}
                                 onChange={handleInputChange}
                                 placeholder="+44 7123 456789"
-                                className={errors.customerPhone ? 'error' : ''}
+                                className={errors['customer.phone'] ? 'error' : ''}
                             />
-                            {errors.customerPhone && <span className="error-message">{errors.customerPhone}</span>}
+                            {errors['customer.phone'] && <span className="error-message">{errors['customer.phone']}</span>}
                         </div>
                     </div>
 
@@ -172,8 +233,8 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                         <label className="checkbox-container">
                             <input
                                 type="checkbox"
-                                name="payInStore"
-                                checked={formData.payInStore}
+                                name="bookingDetails.payInStore"
+                                checked={formData.bookingDetails.payInStore}
                                 onChange={handleInputChange}
                             />
                             <span className="checkbox-label">Pay in store</span>
@@ -190,13 +251,13 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             {SERVICES.map(service => (
                                 <label
                                     key={service.id}
-                                    className={`service-card ${formData.service === service.id ? 'selected' : ''}`}
+                                    className={`service-card ${formData.service.id === service.id ? 'selected' : ''}`}
                                 >
                                     <input
                                         type="radio"
                                         name="service"
                                         value={service.id}
-                                        checked={formData.service === service.id}
+                                        checked={formData.service.id === service.id}
                                         onChange={handleInputChange}
                                     />
                                     <div className="service-content">
@@ -217,26 +278,26 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                     <h3>Date & Time</h3>
 
                     <div className="form-group">
-                        <label htmlFor="date">Select Date *</label>
+                        <label htmlFor="bookingDetails.date">Select Date *</label>
                         <input
                             type="date"
-                            id="date"
-                            name="date"
-                            value={formData.date}
+                            id="bookingDetails.date"
+                            name="bookingDetails.date"
+                            value={formData.bookingDetails.date}
                             onChange={handleInputChange}
                             min={today}
-                            className={errors.date ? 'error' : ''}
+                            className={errors['bookingDetails.date'] ? 'error' : ''}
                         />
-                        {errors.date && <span className="error-message">{errors.date}</span>}
+                        {errors['bookingDetails.date'] && <span className="error-message">{errors['bookingDetails.date']}</span>}
                     </div>
 
                     <TimeSlotPicker
-                        selectedDate={formData.date}
-                        selectedSlot={formData.timeSlot}
+                        selectedDate={formData.bookingDetails.date}
+                        selectedSlot={formData.bookingDetails.timeSlot}
                         onSlotSelect={handleSlotSelect}
                         availableSlots={availableSlots}
                     />
-                    {errors.timeSlot && <span className="error-message">{errors.timeSlot}</span>}
+                    {errors['bookingDetails.timeSlot'] && <span className="error-message">{errors['bookingDetails.timeSlot']}</span>}
                 </div>
 
                 <div className="form-actions">

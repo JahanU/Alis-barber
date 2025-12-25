@@ -6,14 +6,12 @@
  * after they have authenticated via Google OAuth.
  */
 import { CALENDAR_SETTINGS } from '../config/calendar';
+import { Service, Customer, BookingDetails } from '../config/booking-types';
 
 export interface BookingData {
-    date: string;
-    timeSlot: string;
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
-    service: string;
+    customer: Customer;
+    service: Service;
+    bookingDetails: BookingDetails;
 }
 
 let googleAccessToken: string | null = null;
@@ -34,7 +32,8 @@ export const createCalendarEvent = async (bookingData: BookingData): Promise<any
     }
 
     try {
-        const { date, timeSlot, customerName, customerEmail, customerPhone, service } = bookingData;
+        const { customer, service, bookingDetails } = bookingData;
+        const { date, timeSlot } = bookingDetails;
 
         // Parse the time slot to get hours and minutes
         const [time, period] = timeSlot.split(' ');
@@ -56,14 +55,14 @@ export const createCalendarEvent = async (bookingData: BookingData): Promise<any
 
         // Create the event object
         const event = {
-            summary: `Barber Appointment - ${service}`,
+            summary: `Barber Appointment - ${service.name}`,
             description: `
 Barber Shop Appointment
 
-Customer: ${customerName}
-Email: ${customerEmail}
-Phone: ${customerPhone}
-Service: ${service}
+Customer: ${customer.name}
+Email: ${customer.email}
+Phone: ${customer.phone}
+Service: ${service.name}
 
 Thank you for booking with us!
       `.trim(),
@@ -76,7 +75,7 @@ Thank you for booking with us!
                 timeZone: CALENDAR_SETTINGS.timeZone,
             },
             attendees: [
-                { email: customerEmail },
+                { email: customer.email },
             ],
             reminders: {
                 useDefault: false,

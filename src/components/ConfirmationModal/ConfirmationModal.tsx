@@ -19,16 +19,6 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
         });
     };
 
-    const getServiceName = (serviceId: string) => {
-        const services: Record<string, string> = {
-            haircut: 'Classic Haircut',
-            beard: 'Beard Trim & Shape',
-            full: 'Full Service (Haircut + Beard)',
-            shave: 'Hot Towel Shave',
-        };
-        return services[serviceId] || serviceId;
-    };
-
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content glass-strong" onClick={(e) => e.stopPropagation()}>
@@ -46,32 +36,42 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
                 <div className="booking-details">
                     <div className="detail-row">
                         <span className="detail-label">Name:</span>
-                        <span className="detail-value">{bookingDetails.customerName}</span>
+                        <span className="detail-value">{bookingDetails.customer.name}</span>
                     </div>
 
                     <div className="detail-row">
                         <span className="detail-label">Email:</span>
-                        <span className="detail-value">{bookingDetails.customerEmail}</span>
+                        <span className="detail-value">{bookingDetails.customer.email}</span>
                     </div>
 
                     <div className="detail-row">
                         <span className="detail-label">Phone:</span>
-                        <span className="detail-value">{bookingDetails.customerPhone}</span>
+                        <span className="detail-value">{bookingDetails.customer.phone}</span>
                     </div>
+
+                    {!bookingDetails.bookingDetails.stripePaymentPaid && <div className="detail-row">
+                        <span className="detail-label">Pay In Store:</span>
+                        <span className="detail-value">{bookingDetails.bookingDetails.payInStore ? 'Yes' : 'No'}</span>
+                    </div>}
+
+                    {bookingDetails.bookingDetails?.stripePaymentPaid && <div className="detail-row">
+                        <span className="detail-label">Paid Online:</span>
+                        <span className="detail-value">{bookingDetails.bookingDetails?.stripePaymentPaid ? 'Yes' : 'No'}</span>
+                    </div>}
 
                     <div className="detail-row highlight">
                         <span className="detail-label">Service:</span>
-                        <span className="detail-value">{getServiceName(bookingDetails.service)}</span>
+                        <span className="detail-value">{bookingDetails.service.name}</span>
                     </div>
 
                     <div className="detail-row highlight">
                         <span className="detail-label">Date:</span>
-                        <span className="detail-value">{formatDate(bookingDetails.date)}</span>
+                        <span className="detail-value">{formatDate(bookingDetails.bookingDetails.date)}</span>
                     </div>
 
                     <div className="detail-row highlight">
                         <span className="detail-label">Time:</span>
-                        <span className="detail-value">{bookingDetails.timeSlot}</span>
+                        <span className="detail-value">{bookingDetails.bookingDetails.timeSlot}</span>
                     </div>
                 </div>
 
