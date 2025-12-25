@@ -39,6 +39,16 @@
     gap: var(--spacing-lg);
 }
 
+.error-banner {
+    padding: var(--spacing-md);
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: var(--radius-md);
+    color: #fca5a5;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 .login-form .form-group {
     display: flex;
     flex-direction: column;
