@@ -15,6 +15,7 @@ A beautiful, modern web application for barber shop appointments with Google Cal
 - ✂️ **Service Selection** - Multiple barber services with visual selection
 - 🕐 **Time Slot Booking** - Easy 1-hour slot selection (9 AM - 6 PM)
 - ✅ **Form Validation** - Real-time validation with helpful error messages
+- 🔐 **Staff Authentication** - Secure staff-only login powered by Supabase
 - 🎭 **Glassmorphism Design** - Modern UI effects with backdrop blur
 
 ## 🚀 Getting Started
@@ -41,6 +42,10 @@ A beautiful, modern web application for barber shop appointments with Google Cal
    - Follow the detailed guide in [GOOGLE_CALENDAR_SETUP.md](./GOOGLE_CALENDAR_SETUP.md)
    - Update `src/config/calendar.js` with your Client ID
 
+4. Set up Supabase Authentication
+   - Follow the detailed guide in [SUPABASE_AUTH.md](./SUPABASE_AUTH.md)
+   - Add your credentials to `.env.local`
+
 4. Start the development server
    ```bash
    npm run dev
@@ -52,6 +57,7 @@ A beautiful, modern web application for barber shop appointments with Google Cal
 
 - **[React](https://react.dev/)** - UI library
 - **[Vite](https://vite.dev/)** - Build tool and dev server
+- **[Supabase](https://supabase.com/)** - Authentication and backend-as-a-service
 - **[Google Calendar API](https://developers.google.com/calendar)** - Calendar integration
 - **[@react-oauth/google](https://www.npmjs.com/package/@react-oauth/google)** - Google OAuth
 - **[gapi-script](https://www.npmjs.com/package/gapi-script)** - Google API client

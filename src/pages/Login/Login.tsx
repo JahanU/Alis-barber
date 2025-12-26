@@ -1,15 +1,35 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './Login.css';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { signIn } = useAuth();
+    const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Placeholder for login logic
-        alert('Login functionality coming soon!');
+        setError('');
+        setLoading(true);
+
+        try {
+            const { error } = await signIn(email, password);
+
+            if (error) {
+                setError(error.message);
+            } else {
+                // Redirect to home page on successful login
+                navigate('/');
+            }
+        } catch (err) {
+            setError('An unexpected error occurred. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -21,6 +41,12 @@ function Login() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
+                    {error && (
+                        <div className="error-banner">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="form-group">
                         <label htmlFor="email">Email Address</label>
                         <input
@@ -30,6 +56,7 @@ function Login() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter your email"
                             required
+                            disabled={loading}
                         />
                     </div>
 
@@ -42,6 +69,7 @@ function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             required
+                            disabled={loading}
                         />
                     </div>
 
@@ -49,8 +77,12 @@ function Login() {
                         <Link to="#">Forgot password?</Link>
                     </div>
 
-                    <button type="submit" className="btn btn-primary btn-login">
-                        Sign In
+                    <button
+                        type="submit"
+                        className="btn btn-primary btn-login"
+                        disabled={loading}
+                    >
+                        {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
 
