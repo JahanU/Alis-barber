@@ -84,7 +84,7 @@ export const saveAllAvailability = async (availabilities: StaffAvailability[]): 
 
 /**
  * Get available time slots for a specific date based on staff availability
- * Merges slots from all time ranges for the day
+ * Merges slots from all time ranges for the day and excludes booked appointments
  */
 export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<string[]> => {
     // Map JS getDay() (0=Sun, 1=Mon...) to our system (0=Mon, 1=Tue... 6=Sun)
@@ -130,6 +130,35 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
             const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
             allSlots.add(`${displayHour}:00 ${period}`);
         }
+    }
+
+    // Fetch booked appointments for this date
+    const dateString = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const { data: appointments, error: appointmentsError } = await supabase
+        .from('appointments')
+        .select('appointment_time')
+        .eq('appointment_date', dateString)
+        .eq('status', 'confirmed');
+
+    if (appointmentsError) {
+        console.error('Error fetching appointments:', appointmentsError);
+        // Continue without filtering - better to show slots than fail completely
+    }
+
+    // Convert booked times to display format and remove from available slots
+    if (appointments && appointments.length > 0) {
+        const bookedSlots = new Set<string>();
+
+        appointments.forEach(apt => {
+            // Convert HH:MM:SS to display format (e.g., "14:00:00" -> "2:00 PM")
+            const [hour] = apt.appointment_time.split(':').map(Number);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+            bookedSlots.add(`${displayHour}:00 ${period}`);
+        });
+
+        // Remove booked slots from available slots
+        bookedSlots.forEach(slot => allSlots.delete(slot));
     }
 
     // Convert Set to sorted array

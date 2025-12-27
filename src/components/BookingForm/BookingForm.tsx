@@ -170,12 +170,12 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         e.preventDefault();
 
         if (validateForm()) {
-            if (formData.bookingDetails.payInStore) {
-                // Pay in store: proceed with normal booking flow
-                onSubmit(formData as BookingData);
-            } else {
-                // Stripe payment: create checkout session
-                try {
+            try {
+                if (formData.bookingDetails.payInStore) {
+                    // Pay in store: proceed with normal booking flow
+                    onSubmit(formData as BookingData);
+                } else {
+                    // Stripe payment: create checkout session
                     const response = await fetch('/.netlify/functions/create-checkout-session', {
                         method: 'POST',
                         headers: {
@@ -192,10 +192,10 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
 
                     // Redirect to Stripe Checkout
                     window.location.href = url;
-                } catch (error) {
-                    console.error('Checkout error:', error);
-                    alert('Failed to start payment process. Please try again.');
                 }
+            } catch (error) {
+                console.error('Booking error:', error);
+                alert('Failed to create booking. Please try again.');
             }
         }
     };

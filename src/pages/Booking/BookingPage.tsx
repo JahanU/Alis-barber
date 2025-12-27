@@ -4,6 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
 import { BookingData } from '../../services/googleCalendar';
+import { createAppointment } from '../../services/appointmentService';
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -17,6 +18,32 @@ function BookingPage() {
         try {
             setIsSubmitting(true);
             setError(null);
+
+            // 1. Create appointment in Supabase
+            // Convert time slot to HH:MM format for database
+            const timeSlotForDb = formData.bookingDetails.timeSlot; // e.g., "2:00 PM"
+            const [time, period] = timeSlotForDb.split(' ');
+            let [hour] = time.split(':').map(Number);
+            if (period === 'PM' && hour !== 12) hour += 12;
+            else if (period === 'AM' && hour === 12) hour = 0;
+            const appointmentTime = `${hour.toString().padStart(2, '0')}:00`;
+
+            const appointmentData = {
+                customer_name: formData.customer.name,
+                customer_email: formData.customer.email,
+                customer_phone: formData.customer.phone,
+                service_id: formData.service.id,
+                service_name: formData.service.name,
+                service_price: formData.service.price,
+                appointment_date: formData.bookingDetails.date,
+                appointment_time: appointmentTime,
+                payment_status: (formData.bookingDetails.payInStore ? 'pay_in_store' : 'paid') as 'pay_in_store' | 'paid',
+            };
+
+            const savedAppointment = await createAppointment(appointmentData);
+            console.log('Appointment created in Supabase:', savedAppointment.id);
+
+            // 2. Create Google Calendar booking (original logic)
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),

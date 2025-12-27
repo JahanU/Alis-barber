@@ -18,14 +18,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Get initial session
+        /**
+         * 1) On mount: fetch the initial session from Supabase.
+         * This covers page refreshes / returning users where a session may already exist.
+         */
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
             setLoading(false);
         });
 
-        // Listen for auth changes
+        /**
+         * 2) Subscribe to auth state changes (sign in, sign out, token refresh, etc.).
+         * Whenever auth changes, update session/user accordingly.
+         */
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -57,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
     };
 
+    // Provide the auth context to all children
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

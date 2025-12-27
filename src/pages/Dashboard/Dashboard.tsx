@@ -7,6 +7,8 @@ import {
     getMyAvailability,
     saveAllAvailability
 } from '../../services/availabilityService';
+import CalendarView from '../../components/CalendarView/CalendarView';
+import AppointmentsList from '../../components/AppointmentsList/AppointmentsList';
 import './Dashboard.css';
 
 // Group availability ranges by day
@@ -18,6 +20,7 @@ interface DayAvailability {
 function Dashboard() {
     const { user, signOut } = useAuth();
     const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState<'template' | 'calendar' | 'appointments'>('calendar');
     const [availability, setAvailability] = useState<DayAvailability[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -159,88 +162,123 @@ function Dashboard() {
             <main className="dashboard-main">
                 <div className="dashboard-header">
                     <h2>Staff Dashboard</h2>
-                    <p>Set your weekly availability - add multiple time ranges to create breaks</p>
+                    <p>Manage your availability and appointments</p>
                 </div>
 
-                <div className="availability-section glass-strong">
-                    <div className="section-header">
-                        <h3>Weekly Availability</h3>
-                        <button
-                            onClick={handleSave}
-                            className="btn btn-primary"
-                            disabled={saving}
-                        >
-                            {saving ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
+                <div className="dashboard-tabs">
+                    <button
+                        className={`tab-btn ${activeTab === 'template' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('template')}
+                    >
+                        Weekly Template
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'calendar' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('calendar')}
+                    >
+                        Calendar
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'appointments' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('appointments')}
+                    >
+                        Appointments
+                    </button>
+                </div>
 
-                    {message && (
-                        <div className={`message ${message.type}`}>
-                            {message.text}
+                {activeTab === 'template' && (
+                    <div className="availability-section glass-strong">
+                        <div className="section-header">
+                            <h3>Weekly Availability</h3>
+                            <button
+                                onClick={handleSave}
+                                className="btn btn-primary"
+                                disabled={saving}
+                            >
+                                {saving ? 'Saving...' : 'Save Changes'}
+                            </button>
                         </div>
-                    )}
 
-                    <div className="availability-grid">
-                        {availability.map((day) => (
-                            <div key={day.day_of_week} className="day-card glass-strong">
-                                <div className="day-header">
-                                    <span className="day-name">{DAY_NAMES[day.day_of_week]}</span>
-                                    <button
-                                        onClick={() => handleAddTimeRange(day.day_of_week)}
-                                        className="btn-add-range"
-                                        title="Add time range"
-                                    >
-                                        + Add
-                                    </button>
-                                </div>
-
-                                {day.ranges.length === 0 ? (
-                                    <div className="day-closed">
-                                        Closed - Click "+ Add" to set hours
-                                    </div>
-                                ) : (
-                                    <div className="time-ranges">
-                                        {day.ranges.map((range, rangeIndex) => (
-                                            <div key={rangeIndex} className="time-range-item">
-                                                <div className="time-selectors">
-                                                    <div className="time-field">
-                                                        <label>Start</label>
-                                                        <select
-                                                            value={range.start_time}
-                                                            onChange={(e) => handleTimeChange(day.day_of_week, rangeIndex, 'start_time', e.target.value)}
-                                                        >
-                                                            {timeOptions.map(opt => (
-                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div className="time-field">
-                                                        <label>End</label>
-                                                        <select
-                                                            value={range.end_time}
-                                                            onChange={(e) => handleTimeChange(day.day_of_week, rangeIndex, 'end_time', e.target.value)}
-                                                        >
-                                                            {timeOptions.map(opt => (
-                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleRemoveTimeRange(day.day_of_week, rangeIndex)}
-                                                    className="btn-remove-range"
-                                                    title="Remove this time range"
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                        {message && (
+                            <div className={`message ${message.type}`}>
+                                {message.text}
                             </div>
-                        ))}
+                        )}
+
+                        <div className="availability-grid">
+                            {availability.map((day) => (
+                                <div key={day.day_of_week} className="day-card glass-strong">
+                                    <div className="day-header">
+                                        <span className="day-name">{DAY_NAMES[day.day_of_week]}</span>
+                                        <button
+                                            onClick={() => handleAddTimeRange(day.day_of_week)}
+                                            className="btn-add-range"
+                                            title="Add time range"
+                                        >
+                                            + Add
+                                        </button>
+                                    </div>
+
+                                    {day.ranges.length === 0 ? (
+                                        <div className="day-closed">
+                                            Closed - Click "+ Add" to set hours
+                                        </div>
+                                    ) : (
+                                        <div className="time-ranges">
+                                            {day.ranges.map((range, rangeIndex) => (
+                                                <div key={rangeIndex} className="time-range-item">
+                                                    <div className="time-selectors">
+                                                        <div className="time-field">
+                                                            <label>Start</label>
+                                                            <select
+                                                                value={range.start_time}
+                                                                onChange={(e) => handleTimeChange(day.day_of_week, rangeIndex, 'start_time', e.target.value)}
+                                                            >
+                                                                {timeOptions.map(opt => (
+                                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div className="time-field">
+                                                            <label>End</label>
+                                                            <select
+                                                                value={range.end_time}
+                                                                onChange={(e) => handleTimeChange(day.day_of_week, rangeIndex, 'end_time', e.target.value)}
+                                                            >
+                                                                {timeOptions.map(opt => (
+                                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveTimeRange(day.day_of_week, rangeIndex)}
+                                                        className="btn-remove-range"
+                                                        title="Remove this time range"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {activeTab === 'calendar' && (
+                    <div className="section-container glass-strong">
+                        <CalendarView />
+                    </div>
+                )}
+
+                {activeTab === 'appointments' && (
+                    <div className="section-container glass-strong">
+                        <AppointmentsList />
+                    </div>
+                )}
             </main>
         </div>
     );
