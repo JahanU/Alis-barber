@@ -7,7 +7,16 @@
  */
 import { Handler } from '@netlify/functions';
 import { google } from 'googleapis';
+import nodemailer from 'nodemailer';
 import { BookingData } from '../../src/services/googleCalendar';
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+    },
+});
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 
@@ -82,7 +91,6 @@ export const handler: Handler = async (event) => {
                 dateTime: endDateTime.toISOString(),
                 timeZone: 'Europe/London',
             },
-
         };
 
         const calendarId = process.env.BARBER_CALENDAR_ID || 'primary';
@@ -96,11 +104,42 @@ export const handler: Handler = async (event) => {
                 sendUpdates: 'all',
             });
 
+            // Send confirmation email via Nodemailer
+            if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+                try {
+                    await transporter.sendMail({
+                        from: `"Ali Barbers" <${process.env.GMAIL_USER}>`,
+                        to: customer.email,
+                        subject: 'Booking Confirmed - Ali Barbers',
+                        html: `
+                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                                <h1 style="color: #daa520;">Booking Confirmed!</h1>
+                                <p>Hi ${customer.name},</p>
+                                <p>Your appointment at Ali Barbers has been successfully scheduled.</p>
+                                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                    <p><strong>Service:</strong> ${service.name}</p>
+                                    <p><strong>Date:</strong> ${date}</p>
+                                    <p><strong>Time:</strong> ${timeSlot}</p>
+                                    <p><strong>Price:</strong> ${service.price}</p>
+                                    <p><strong>Payment Status:</strong> ${bookingDetails.stripePaymentPaid ? 'Paid Online' : 'Pay In Store'}</p>
+                                </div>
+                                <p>We look forward to seeing you!</p>
+                                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                                <p style="font-size: 12px; color: #666;">If you need to cancel or reschedule, please contact us at least 24 hours in advance.</p>
+                            </div>
+                        `
+                    });
+                } catch (emailError) {
+                    console.error('Failed to send confirmation email:', emailError);
+                }
+            }
+
             return {
                 statusCode: 200,
                 body: JSON.stringify({
                     message: 'Booking created',
-                    event: response.data
+                    event: response.data,
+                    eventId: response.data.id
                 }),
             };
         } catch (apiError: any) {

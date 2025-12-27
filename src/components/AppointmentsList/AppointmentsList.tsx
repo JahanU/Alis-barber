@@ -29,7 +29,37 @@ function AppointmentsList() {
         }
 
         try {
+            // Find the appointment to get the google_event_id
+            const appointment = appointments.find(apt => apt.id === appointmentId);
+
+            // 1. Cancel in Google Calendar if event ID exists
+            if (appointment?.google_event_id) {
+                console.log('Cancelling Google Calendar event:', appointment.google_event_id);
+                try {
+                    const response = await fetch('/.netlify/functions/cancel-booking', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            eventId: appointment.google_event_id,
+                            customerEmail: appointment.customer_email,
+                            customerName: appointment.customer_name,
+                            serviceName: appointment.service_name,
+                            appointmentDate: `${appointment.appointment_date} at ${appointment.appointment_time}`,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.warn('Google Calendar cancellation failed:', errorData.message);
+                        // We continue with local cancellation even if Google fails
+                    }
+                } catch (gcalError) {
+                    console.error('Error calling cancel-booking function:', gcalError);
+                }
+            }
+
+            // 2. Cancel in Supabase
             await cancelAppointment(appointmentId);
+
             // Reload appointments
             await loadAppointments();
         } catch (error) {

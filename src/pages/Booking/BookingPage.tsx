@@ -19,7 +19,20 @@ function BookingPage() {
             setIsSubmitting(true);
             setError(null);
 
-            // 1. Create appointment in Supabase
+            // 1. Create Google Calendar booking first to get the event ID
+            const response = await fetch('/.netlify/functions/create-booking', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create booking');
+            }
+
+            const { eventId } = await response.json();
+
+            // 2. Create appointment in Supabase with the Google Event ID
             // Convert time slot to HH:MM format for database
             const timeSlotForDb = formData.bookingDetails.timeSlot; // e.g., "2:00 PM"
             const [time, period] = timeSlotForDb.split(' ');
@@ -38,21 +51,11 @@ function BookingPage() {
                 appointment_date: formData.bookingDetails.date,
                 appointment_time: appointmentTime,
                 payment_status: (formData.bookingDetails.payInStore ? 'pay_in_store' : 'paid') as 'pay_in_store' | 'paid',
+                google_event_id: eventId, // Save the ID in the initial insert!
             };
 
             const savedAppointment = await createAppointment(appointmentData);
-            console.log('Appointment created in Supabase:', savedAppointment.id);
-
-            // 2. Create Google Calendar booking (original logic)
-            const response = await fetch('/.netlify/functions/create-booking', {
-                method: 'POST',
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to create booking');
-            }
+            console.log('Appointment created in Supabase with Google ID:', savedAppointment.id);
 
             setBookingData(formData);
         } catch (err: any) {

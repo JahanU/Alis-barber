@@ -21,6 +21,7 @@ export interface Appointment {
     status?: 'confirmed' | 'cancelled' | 'completed';
     payment_status?: 'paid' | 'pay_in_store';
     stripe_session_id?: string;
+    google_event_id?: string;
     created_at?: string;
     updated_at?: string;
 }
@@ -157,6 +158,27 @@ export const updateAppointmentStatus = async (
 
     if (error) {
         console.error('Error updating appointment status:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update appointment with Google Calendar event ID
+ */
+export const updateAppointmentGoogleId = async (
+    appointmentId: string,
+    googleEventId: string
+): Promise<void> => {
+    const { error } = await supabase
+        .from('appointments')
+        .update({
+            google_event_id: googleEventId,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', appointmentId);
+
+    if (error) {
+        console.error('Error updating Google event ID:', error);
         throw error;
     }
 };
