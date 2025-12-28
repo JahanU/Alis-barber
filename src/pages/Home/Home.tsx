@@ -1,6 +1,7 @@
 import Hero from '../../components/Hero/Hero';
 import Gallery from '../../components/Gallery/Gallery';
 import ShopInfo from '../../components/ShopInfo/ShopInfo';
+import Footer from '../../components/Footer/Footer';
 import '../../App.css';
 
 function Home() {
@@ -9,11 +10,7 @@ function Home() {
             <Hero />
             <Gallery />
             <ShopInfo />
-            <footer className="app-footer">
-                <div className="container">
-                    <p>&copy; {new Date().getFullYear()} Ali Barbers. Professional Grooming Services.</p>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

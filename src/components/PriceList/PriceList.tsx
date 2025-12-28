@@ -27,7 +27,6 @@ function PriceList() {
         <div className="price-list-container">
             <div className="price-list-header">
                 <h2>Our Services & Prices</h2>
-                <p>Premium grooming for the modern man</p>
             </div>
 
             <div className="service-section">
@@ -43,17 +42,19 @@ function PriceList() {
                     {homeServices.map(renderServiceCard)}
                 </div>
                 <p className="section-note">
-                    * Home Service only covers PR8 and PR9 Postcodes.<br />
-                    * 24h notice is required for a full refund on cancellations.
+                    Home Service only covers PR8 and PR9 Postcodes.<br />
+                    Contact us to schedule a home service.
                 </p>
 
             </div>
 
-            <div className="view-footer">
+            {/* <div className="view-footer">
                 <button className="btn btn-primary btn-large" onClick={() => navigate('/book')}>
                     <span>Book Now</span>
                 </button>
-            </div>
+            </div> */}
+
+
         </div>
     );
 };

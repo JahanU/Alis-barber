@@ -22,13 +22,13 @@ function Hero() {
                     </p>
 
                     <div className="hero-actions">
-                        <button className="btn btn-primary btn-large" onClick={() => navigate('/book')}>
+                        {/* <button className="btn btn-primary btn-large" onClick={() => navigate('/book')}>
                             <span>Book Your Appointment</span>
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                        </button>
-                        <button className="btn btn-secondary btn-large" onClick={() => navigate('/prices')}>
+                        </button> */}
+                        <button className="btn btn-primary btn-large" onClick={() => navigate('/prices')}>
                             <span>Prices</span>
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M9 15L14 10L9 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -44,7 +44,7 @@ function Hero() {
                         <p>Master barbers with years of experience</p>
                     </div>
 
-                    <div className="feature-card glass">
+                    {/* <div className="feature-card glass">
                         <div className="feature-icon">⚡</div>
                         <h3>Quick Booking</h3>
                         <p>Select your time slot in just a few clicks</p>
@@ -54,7 +54,7 @@ function Hero() {
                         <div className="feature-icon">📅</div>
                         <h3>Google Calendar</h3>
                         <p>Automatic reminders for your appointment</p>
-                    </div>
+                    </div> */}
 
                     <div className="feature-card glass">
                         <div className="feature-icon">🏠</div>

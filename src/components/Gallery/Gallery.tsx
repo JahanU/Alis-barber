@@ -8,18 +8,18 @@ interface GalleryItem {
 }
 
 const GALLERY_ITEMS: GalleryItem[] = [
-    {
-        id: 1,
-        image: '/classic-fade.jpg',
-        title: 'Classic Fade',
-        description: 'Sharp, clean lines with a smooth fade transition'
-    },
-    {
-        id: 2,
-        image: '/beard-trim.png',
-        title: 'Beard Trim & Shape',
-        description: 'Professional grooming for the perfect look'
-    },
+    // {
+    //     id: 1,
+    //     image: '/classic-fade.jpg',
+    //     title: 'Classic Fade',
+    //     description: 'Sharp, clean lines with a smooth fade transition'
+    // },
+    // {
+    //     id: 2,
+    //     image: '/beard-trim.png',
+    //     title: 'Beard Trim & Shape',
+    //     description: 'Professional grooming for the perfect look'
+    // },
     {
         id: 3,
         image: '/modern-cut.png',
