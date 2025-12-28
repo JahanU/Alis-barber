@@ -34,7 +34,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         service: {
             id: '',
             name: '',
-            price: '',
+            price: 0,
             duration: '',
             description: '',
             category: 'inShop'
