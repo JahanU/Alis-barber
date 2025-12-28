@@ -32,7 +32,6 @@ export const handler: Handler = async (event) => {
         }
         // Determine base URL (works in both local and production)
         const baseUrl = process.env.URL || 'http://localhost:8888';
-        const price = Number(service.price.replace(/[^\d.]/g, ''));
 
         // Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
@@ -44,7 +43,7 @@ export const handler: Handler = async (event) => {
                         name: 'Ali Barbers',
                         description: `${service.name} - ${date} at ${timeSlot}`,
                     },
-                    unit_amount: price * 100, // Stripe takes cents, so multiply by 100
+                    unit_amount: service.price * 100, // Stripe takes cents, so multiply by 100
                 },
                 quantity: 1,
             }],

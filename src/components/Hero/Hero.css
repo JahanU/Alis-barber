@@ -186,9 +186,13 @@
     }
 
     .hero-features {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-md);
         padding: 0 var(--spacing-sm);
+    }
+
+    .feature-card p {
+        font-size: 0.75rem;
     }
 
     .feature-card {

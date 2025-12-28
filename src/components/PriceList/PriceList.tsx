@@ -16,7 +16,7 @@ function PriceList() {
                     <p className="service-description">{service.description}</p>
                 </div>
                 <div className="service-meta">
-                    <span className="service-cost">{service.price}</span>
+                    <span className="service-cost">£{service.price}</span>
                     <span className="service-time">{service.duration}</span>
                 </div>
             </div>

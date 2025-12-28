@@ -10,36 +10,24 @@ interface GalleryItem {
 const GALLERY_ITEMS: GalleryItem[] = [
     {
         id: 1,
-        image: '/classic-fade.jpg',
-        title: 'Classic Fade',
-        description: 'Sharp, clean lines with a smooth fade transition'
-    },
-    {
-        id: 2,
-        image: '/beard-trim.png',
-        title: 'Beard Trim & Shape',
-        description: 'Professional grooming for the perfect look'
-    },
-    {
-        id: 3,
         image: '/modern-cut.png',
         title: 'Modern Textured Cut',
         description: 'Contemporary styling with volume and texture'
     },
     {
-        id: 4,
+        id: 2,
         image: '/pompadour-style.png',
         title: 'Pompadour Style',
         description: 'Classic gentleman\'s cut with high volume'
     },
     {
-        id: 5,
+        id: 3,
         image: '/hot-towel-shave.png',
         title: 'Hot Towel Shave',
         description: 'Traditional luxury shaving experience'
     },
     {
-        id: 6,
+        id: 4,
         image: '/barber-work.png',
         title: 'Expert Craftsmanship',
         description: 'Premium barbering service in our shop'
