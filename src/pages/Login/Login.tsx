@@ -22,8 +22,8 @@ function Login() {
             if (error) {
                 setError(error.message);
             } else {
-                // Redirect to home page on successful login
-                navigate('/');
+                // Redirect to dashboard on successful login
+                navigate('/dashboard');
             }
         } catch (err) {
             setError('An unexpected error occurred. Please try again.');

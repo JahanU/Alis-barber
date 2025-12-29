@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
 import { BookingData } from '../../services/googleCalendar';
+import { parseTimeSlot } from '../../utils/timeUtils';
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -11,12 +12,15 @@ function BookingPage() {
     const [bookingData, setBookingData] = useState<BookingData | null>(null);
     const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+    const isProcessingPayment = useRef(false);
 
+    // TODO review later on order of operations and async etc
     const handleBookingSubmit = useCallback(async (formData: BookingData) => {
         try {
             setIsSubmitting(true);
             setError(null);
+            // 1. Create Google Calendar booking + Email
+            // TODO: I think - Need to go this first as we need the googleEventId so we can cancel the appointment via the dashboard to the customers calendar
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),
@@ -27,6 +31,22 @@ function BookingPage() {
                 throw new Error(errorData.message || 'Failed to create booking');
             }
 
+            const { eventId } = await response.json();
+
+            // 2. Save appointment to Database (Supabase)
+            try {
+                await fetch('/.netlify/functions/save-appointment', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        bookingData: formData,
+                        googleEventId: eventId
+                    }),
+                });
+            } catch (dbErr) {
+                console.error('[Booking] Sequential DB call failed (non-critical):', dbErr);
+                // Sequential DB call failed (non-critical)
+                // We keep moving because the calendar event IS created
+            }
             setBookingData(formData);
         } catch (err: any) {
             console.error('Booking error:', err);
@@ -41,30 +61,24 @@ function BookingPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
-        if (sessionId) {
-            // Verify payment with backend
-            setIsVerifyingPayment(true);
+        if (sessionId && !isProcessingPayment.current) {
+            isProcessingPayment.current = true; // Lock the door
 
             fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.verified && data.bookingData) {
-                        // Clear URL params
                         window.history.replaceState({}, '', '/book');
-
-                        // Payment confirmed - create booking
                         handleBookingSubmit(data.bookingData);
                     } else {
-                        setError(data.error || 'Payment verification failed. Please contact support.');
+                        throw new Error(data.error || 'Payment verification failed.');
                     }
                 })
                 .catch(err => {
-                    console.error('Payment verification error:', err);
-                    setError('Failed to verify payment. Please contact support.');
+                    console.error('Payment error:', err);
+                    setError(err.message);
+                    isProcessingPayment.current = false; // Unlock on failure
                 })
-                .finally(() => {
-                    setIsVerifyingPayment(false);
-                });
         }
     }, [handleBookingSubmit]);
 
@@ -74,11 +88,9 @@ function BookingPage() {
                 setIsAddingToCalendar(true);
 
                 const startTime = new Date(bookingData!.bookingDetails.date);
-                const [time, period] = bookingData!.bookingDetails.timeSlot.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                else if (period === 'AM' && hours === 12) hours = 0;
-                startTime.setHours(hours, minutes || 0, 0, 0);
+                const { hours, minutes } = parseTimeSlot(bookingData!.bookingDetails.timeSlot);
+                startTime.setHours(hours, minutes, 0, 0);
+
 
                 const endTime = new Date(startTime);
                 endTime.setHours(startTime.getHours() + 1);
@@ -127,20 +139,12 @@ function BookingPage() {
                 </div>
             )}
 
-            {isVerifyingPayment && (
-                <div className="error-banner" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                    <div className="container">
-                        <span>🔒 Verifying payment...</span>
-                    </div>
-                </div>
-            )}
-
             <div className="booking-view">
                 <div className="container">
                     <BookingForm
                         onSubmit={handleBookingSubmit}
                         onCancel={() => navigate('/')}
-                        isSubmitting={isSubmitting || isVerifyingPayment}
+                        isSubmitting={isSubmitting}
                     />
                 </div>
             </div>

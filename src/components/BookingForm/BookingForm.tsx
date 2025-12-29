@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './BookingForm.css';
 import { Customer, BookingDetails, Service } from '../../config/booking-types';
-import { BookingData, getAvailableTimeSlots } from '../../services/googleCalendar';
+import { BookingData } from '../../services/googleCalendar';
+import { getAvailableSlotsForDate } from '../../services/availabilityService';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 import { SERVICES } from '../../config/services';
-
-
 
 interface BookingFormProps {
     onSubmit: (data: BookingData) => void;
@@ -22,7 +21,7 @@ interface FormData {
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
         bookingDetails: {
-            date: new Date().toISOString().split('T')[0],
+            date: new Date(Date.now()).toISOString().split('T')[0],
             timeSlot: '',
             payInStore: false,
         },
@@ -34,14 +33,42 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         service: {
             id: '',
             name: '',
-            price: 0,
             duration: '',
+            price: 0,
             description: '',
-            category: 'inShop'
-        },
+            category: 'inShop',
+        }
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const availableSlots = formData.bookingDetails.date ? getAvailableTimeSlots(new Date(formData.bookingDetails.date)) : [];
+    const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+    const [loadingSlots, setLoadingSlots] = useState(false);
+
+    // Fetch available slots when date changes
+    useEffect(() => {
+        const fetchSlots = async () => {
+            if (formData.bookingDetails.date) {
+                setLoadingSlots(true);
+                try {
+                    const slots = await getAvailableSlotsForDate(new Date(formData.bookingDetails.date));
+                    setAvailableSlots(slots);
+                    // Clear selected slot if it's no longer available
+                    if (formData.bookingDetails.timeSlot && !slots.includes(formData.bookingDetails.timeSlot)) {
+                        setFormData(prev => ({
+                            ...prev,
+                            bookingDetails: { ...prev.bookingDetails, timeSlot: '' }
+                        }));
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch slots:', error);
+                    setAvailableSlots([]);
+                } finally {
+                    setLoadingSlots(false);
+                }
+            }
+        };
+
+        fetchSlots();
+    }, [formData.bookingDetails.date]);
 
 
     const handleInputChange = (
@@ -141,12 +168,12 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         e.preventDefault();
 
         if (validateForm()) {
-            if (formData.bookingDetails.payInStore) {
-                // Pay in store: proceed with normal booking flow
-                onSubmit(formData as BookingData);
-            } else {
-                // Stripe payment: create checkout session
-                try {
+            try {
+                if (formData.bookingDetails.payInStore) {
+                    // Pay in store: proceed with normal booking flow
+                    onSubmit(formData as BookingData);
+                } else {
+                    // Stripe payment: create checkout session
                     const response = await fetch('/.netlify/functions/create-checkout-session', {
                         method: 'POST',
                         headers: {
@@ -163,10 +190,10 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
 
                     // Redirect to Stripe Checkout
                     window.location.href = url;
-                } catch (error) {
-                    console.error('Checkout error:', error);
-                    alert('Failed to start payment process. Please try again.');
                 }
+            } catch (error) {
+                console.error('Booking error:', error);
+                alert('Failed to create booking. Please try again.');
             }
         }
     };
@@ -291,12 +318,16 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                         {errors['bookingDetails.date'] && <span className="error-message">{errors['bookingDetails.date']}</span>}
                     </div>
 
-                    <TimeSlotPicker
-                        selectedDate={formData.bookingDetails.date}
-                        selectedSlot={formData.bookingDetails.timeSlot}
-                        onSlotSelect={handleSlotSelect}
-                        availableSlots={availableSlots}
-                    />
+                    {loadingSlots ? (
+                        <div className="loading-slots">Loading available times...</div>
+                    ) : (
+                        <TimeSlotPicker
+                            selectedDate={formData.bookingDetails.date}
+                            selectedSlot={formData.bookingDetails.timeSlot}
+                            onSlotSelect={handleSlotSelect}
+                            availableSlots={availableSlots}
+                        />
+                    )}
                     {errors['bookingDetails.timeSlot'] && <span className="error-message">{errors['bookingDetails.timeSlot']}</span>}
                 </div>
 

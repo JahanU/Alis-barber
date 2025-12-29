@@ -52,7 +52,8 @@ export const handler: Handler = async (event) => {
             cancel_url: `${baseUrl}/book`,
             customer_email: customer.email,
             metadata: {
-                // Store booking data in session metadata for later retrieval
+                // Store booking data in session metadata for later retrieval. 
+                // Gets converted to string by Stripe
                 customerName: customer.name,
                 customerEmail: customer.email,
                 customerPhone: customer.phone,
