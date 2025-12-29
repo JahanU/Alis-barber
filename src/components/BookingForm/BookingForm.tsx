@@ -28,18 +28,11 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
             payInStore: false,
         },
         customer: {
-            name: '',
-            email: '',
-            phone: '',
+            name: 'A',
+            email: 'A@gmail.com',
+            phone: '1234567890',
         },
-        service: {
-            id: '',
-            name: '',
-            price: 0,
-            duration: '',
-            description: '',
-            category: 'inShop'
-        },
+        service: SERVICES[0]
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);

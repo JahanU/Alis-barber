@@ -14,7 +14,7 @@ export interface Appointment {
     customer_phone: string;
     service_id: string;
     service_name: string;
-    service_price: string;
+    service_price: number;
     appointment_date: string; // YYYY-MM-DD format
     appointment_time: string; // HH:MM format
     duration_minutes?: number;

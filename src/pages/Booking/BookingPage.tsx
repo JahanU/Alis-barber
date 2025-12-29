@@ -4,7 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
 import { BookingData } from '../../services/googleCalendar';
-import { createAppointment } from '../../services/appointmentService';
+
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -20,6 +20,7 @@ function BookingPage() {
             setError(null);
 
             // 1. Create Google Calendar booking first to get the event ID
+            // 2. Create the appointment in the database
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),
@@ -30,34 +31,10 @@ function BookingPage() {
                 throw new Error(errorData.message || 'Failed to create booking');
             }
 
-            const { eventId } = await response.json();
-
-            // 2. Create appointment in Supabase with the Google Event ID
-            // Convert time slot to HH:MM format for database
-            const timeSlotForDb = formData.bookingDetails.timeSlot; // e.g., "2:00 PM"
-            const [time, period] = timeSlotForDb.split(' ');
-            let [hour] = time.split(':').map(Number);
-            if (period === 'PM' && hour !== 12) hour += 12;
-            else if (period === 'AM' && hour === 12) hour = 0;
-            const appointmentTime = `${hour.toString().padStart(2, '0')}:00`;
-
-            const appointmentData = {
-                customer_name: formData.customer.name,
-                customer_email: formData.customer.email,
-                customer_phone: formData.customer.phone,
-                service_id: formData.service.id,
-                service_name: formData.service.name,
-                service_price: formData.service.price,
-                appointment_date: formData.bookingDetails.date,
-                appointment_time: appointmentTime,
-                payment_status: (formData.bookingDetails.payInStore ? 'pay_in_store' : 'paid') as 'pay_in_store' | 'paid',
-                google_event_id: eventId, // Save the ID in the initial insert!
-            };
-
-            const savedAppointment = await createAppointment(appointmentData);
-            console.log('Appointment created in Supabase with Google ID:', savedAppointment.id);
-
+            const { eventId, appointmentId } = await response.json();
+            console.log(`[Booking] Successfully created: Event ${eventId}, Appointment ${appointmentId}`);
             setBookingData(formData);
+
         } catch (err: any) {
             console.error('Booking error:', err);
             setError(err.message || 'An unexpected error occurred. Please try again.');
