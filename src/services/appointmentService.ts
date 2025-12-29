@@ -20,7 +20,7 @@ export interface Appointment {
     duration_minutes?: number;
     status?: 'confirmed' | 'cancelled' | 'completed';
     payment_status?: 'paid' | 'pay_in_store';
-    stripe_session_id?: string;
+    stripe_session_id?: string; // todo remove later
     google_event_id?: string;
     created_at?: string;
     updated_at?: string;

@@ -6,8 +6,6 @@ import { getAvailableSlotsForDate } from '../../services/availabilityService';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 import { SERVICES } from '../../config/services';
 
-
-
 interface BookingFormProps {
     onSubmit: (data: BookingData) => void;
     onCancel: () => void;
@@ -23,16 +21,23 @@ interface FormData {
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
         bookingDetails: {
-            date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            date: new Date(Date.now()).toISOString().split('T')[0],
             timeSlot: '',
-            payInStore: true,
+            payInStore: false,
         },
         customer: {
-            name: 'A',
-            email: 'A@gmail.com',
-            phone: '1234567890',
+            name: '',
+            email: '',
+            phone: '',
         },
-        service: SERVICES[0]
+        service: {
+            id: '',
+            name: '',
+            duration: '',
+            price: 0,
+            description: '',
+            category: 'inShop',
+        }
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);
