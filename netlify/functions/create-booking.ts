@@ -8,13 +8,9 @@
 import { Handler } from '@netlify/functions';
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
-import { createClient } from '@supabase/supabase-js';
 import { BookingData } from '../../src/services/googleCalendar';
+import { parseTimeSlot } from '../../src/utils/timeUtils';
 
-const supabase = createClient(
-    process.env.SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 
 const transporter = nodemailer.createTransport({
@@ -27,18 +23,6 @@ const transporter = nodemailer.createTransport({
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];
 
-/**
- * HELPER: Parse time slot string (e.g., "2:00 PM") to 24h format HH:MM
- */
-function parseTimeSlot(timeSlot: string): { hours: number; minutes: number; display24h: string } {
-    const [time, period] = timeSlot.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    if (period === 'PM' && hours !== 12) hours += 12;
-    else if (period === 'AM' && hours === 12) hours = 0;
-
-    const display24h = `${hours.toString().padStart(2, '0')}:${(minutes || 0).toString().padStart(2, '0')}`;
-    return { hours, minutes: minutes || 0, display24h };
-}
 
 export const handler: Handler = async (event) => {
 
@@ -52,8 +36,6 @@ export const handler: Handler = async (event) => {
         const requiredEnv = [
             'GOOGLE_CLIENT_EMAIL',
             'GOOGLE_PRIVATE_KEY',
-            'SUPABASE_URL',
-            'SUPABASE_SERVICE_ROLE_KEY'
         ];
         const missing = requiredEnv.filter(key => !process.env[key]);
         if (missing.length > 0) {
@@ -143,39 +125,11 @@ export const handler: Handler = async (event) => {
             }
         }
 
-        // 4. Record in Supabase
-        console.log(`[create-booking] Recording appointment in Supabase...`);
-        const { data: savedAppointment, error: supabaseError } = await supabase
-            .from('appointments')
-            .insert({
-                customer_name: customer.name,
-                customer_email: customer.email,
-                customer_phone: customer.phone,
-                service_id: service.id,
-                service_name: service.name,
-                service_price: Number(service.price),
-                appointment_date: date,
-                appointment_time: display24h,
-                payment_status: bookingDetails.stripePaymentPaid ? 'paid' : 'pay_in_store',
-                google_event_id: googleResponse.data.id,
-                status: 'confirmed',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-        if (supabaseError) {
-            console.error('[create-booking] Supabase failed:', supabaseError);
-            // We already have the calendar event, so we still return 200 but log the error
-        }
-
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'Booking created successfully',
-                eventId: googleResponse.data.id,
-                appointmentId: savedAppointment?.id
+                eventId: googleResponse.data.id
             }),
         };
 

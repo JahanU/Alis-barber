@@ -6,6 +6,8 @@
  * SUPPORTS: Multiple time ranges per day (for breaks)
  */
 import { supabase } from '../config/supabaseClient';
+import { parseTimeSlot } from '../utils/timeUtils';
+
 
 export interface StaffAvailability {
     id?: string;
@@ -173,11 +175,6 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
  * Helper: Convert "12:00 PM" format to 24-hour number for sorting
  */
 function convertTo24Hour(timeSlot: string): number {
-    const [time, period] = timeSlot.split(' ');
-    let [hour] = time.split(':').map(Number);
-
-    if (period === 'PM' && hour !== 12) hour += 12;
-    else if (period === 'AM' && hour === 12) hour = 0;
-
-    return hour;
+    const { hours } = parseTimeSlot(timeSlot);
+    return hours;
 }

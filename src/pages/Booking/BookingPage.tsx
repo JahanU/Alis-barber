@@ -4,6 +4,8 @@ import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
 import { BookingData } from '../../services/googleCalendar';
+import { parseTimeSlot } from '../../utils/timeUtils';
+
 
 
 function BookingPage() {
@@ -19,8 +21,8 @@ function BookingPage() {
             setIsSubmitting(true);
             setError(null);
 
-            // 1. Create Google Calendar booking first to get the event ID
-            // 2. Create the appointment in the database
+            // TODO review later on order of operations and async etc
+            // 1. Create Google Calendar booking + Email
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),
@@ -31,9 +33,33 @@ function BookingPage() {
                 throw new Error(errorData.message || 'Failed to create booking');
             }
 
-            const { eventId, appointmentId } = await response.json();
-            console.log(`[Booking] Successfully created: Event ${eventId}, Appointment ${appointmentId}`);
+            const { eventId } = await response.json();
+            console.log(`[Booking] Calendar Event Created: ${eventId}`);
+
+            // 2. Save appointment to Database (Supabase)
+            try {
+                const dbResponse = await fetch('/.netlify/functions/save-appointment', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        bookingData: formData,
+                        googleEventId: eventId
+                    }),
+                });
+
+                if (dbResponse.ok) {
+                    const { appointmentId } = await dbResponse.json();
+                    console.log(`[Booking] Database Record Created: ${appointmentId}`);
+                } else {
+                    const dbError = await dbResponse.json();
+                    console.error('[Booking] Database record failed (non-critical):', dbError.message);
+                }
+            } catch (dbErr) {
+                console.error('[Booking] Sequential DB call failed (non-critical):', dbErr);
+                // We keep moving because the calendar event IS created
+            }
+
             setBookingData(formData);
+
 
         } catch (err: any) {
             console.error('Booking error:', err);
@@ -81,11 +107,9 @@ function BookingPage() {
                 setIsAddingToCalendar(true);
 
                 const startTime = new Date(bookingData!.bookingDetails.date);
-                const [time, period] = bookingData!.bookingDetails.timeSlot.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                else if (period === 'AM' && hours === 12) hours = 0;
-                startTime.setHours(hours, minutes || 0, 0, 0);
+                const { hours, minutes } = parseTimeSlot(bookingData!.bookingDetails.timeSlot);
+                startTime.setHours(hours, minutes, 0, 0);
+
 
                 const endTime = new Date(startTime);
                 endTime.setHours(startTime.getHours() + 1);

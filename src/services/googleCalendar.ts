@@ -7,6 +7,8 @@
  */
 import { CALENDAR_SETTINGS } from '../config/calendar';
 import { Service, Customer, BookingDetails } from '../config/booking-types';
+import { parseTimeSlot } from '../utils/timeUtils';
+
 
 export interface BookingData {
     customer: Customer;
@@ -35,16 +37,8 @@ export const createCalendarEvent = async (bookingData: BookingData): Promise<any
         const { customer, service, bookingDetails } = bookingData;
         const { date, timeSlot } = bookingDetails;
 
-        // Parse the time slot to get hours and minutes
-        const [time, period] = timeSlot.split(' ');
-        let [hours, minutes] = time.split(':').map(Number);
+        const { hours, minutes } = parseTimeSlot(timeSlot);
 
-        // Convert to 24-hour format
-        if (period === 'PM' && hours !== 12) {
-            hours += 12;
-        } else if (period === 'AM' && hours === 12) {
-            hours = 0;
-        }
 
         // Create start and end date/time
         const startDateTime = new Date(date);
