@@ -35,7 +35,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         service: {
             id: '',
             name: '',
-            price: '',
+            price: 0,
             duration: '',
             description: '',
             category: 'inShop'
@@ -293,7 +293,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                                         <span className="service-name">{service.name}</span>
                                         <div className="service-details">
                                             <span className="service-duration">{service.duration}</span>
-                                            <span className="service-price">{service.price}</span>
+                                            <span className="service-price">£{service.price}</span>
                                         </div>
                                     </div>
                                 </label>

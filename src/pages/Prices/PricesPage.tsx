@@ -1,3 +1,4 @@
+import Footer from "../../components/Footer/Footer";
 import PriceList from "../../components/PriceList/PriceList";
 
 function PricesPage() {
@@ -8,6 +9,7 @@ function PricesPage() {
                     <PriceList />
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

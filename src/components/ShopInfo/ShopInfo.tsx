@@ -2,13 +2,13 @@ import './ShopInfo.css';
 
 function ShopInfo() {
     const hours = [
-        { day: 'Monday', time: '9 am – 6 pm' },
-        { day: 'Tuesday', time: '9 am – 6 pm' },
-        { day: 'Wednesday', time: '9 am – 6 pm' },
-        { day: 'Thursday', time: '9 am – 6 pm' },
-        { day: 'Friday', time: '9 am – 7 pm' },
-        { day: 'Saturday', time: '9 am – 7 pm' },
-        { day: 'Sunday', time: '10 am – 6 pm' },
+        { day: 'Monday', time: '09:00 am – 06:00 pm' },
+        { day: 'Tuesday', time: '09:00 am – 06:00 pm' },
+        { day: 'Wednesday', time: '09:00 am – 06:00 pm' },
+        { day: 'Thursday', time: '09:00 am – 06:00 pm' },
+        { day: 'Friday', time: '09:00 am – 06:00 pm' },
+        { day: 'Saturday', time: '09:00 am – 06:00 pm' },
+        { day: 'Sunday', time: '10:00 am – 04:00 pm' },
     ];
 
     return (

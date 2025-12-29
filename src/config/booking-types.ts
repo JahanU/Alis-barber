@@ -8,7 +8,7 @@ export interface Service {
     id: string;
     name: string;
     duration: string;
-    price: string;
+    price: number;
     description: string;
     category: 'inShop' | 'home';
 }
