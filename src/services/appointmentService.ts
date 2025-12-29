@@ -16,7 +16,7 @@ export interface Appointment {
     service_name: string;
     service_price: number;
     appointment_date: string; // YYYY-MM-DD format
-    appointment_time: string; // HH:MM format
+    appointment_time: string; // HH:MM:SS format (Supabase time type)
     duration_minutes?: number;
     status?: 'confirmed' | 'cancelled' | 'completed';
     payment_status?: 'paid' | 'pay_in_store';
@@ -27,16 +27,35 @@ export interface Appointment {
 }
 
 /**
- * Create a new appointment
+ * Shared function to save an appointment record.
+ * Can be called from frontend (anon client) or backend (service role client).
+ * Automatically assigns staff_user_id if not provided.
  */
-export const createAppointment = async (appointment: Appointment): Promise<Appointment> => {
-    const { data: { user } } = await supabase.auth.getUser();
 
-    // For now, we'll use a default staff user ID if not authenticated
-    // In production, you'd want to handle staff assignment differently
+// TODO: handle for multiple shops and staff members
+export const createAppointment = async (
+    appointment: Appointment): Promise<Appointment> => {
+    let staffId = appointment.staff_user_id;
+    if (!staffId) {
+        // Look for the first staff member who has availability set
+        const { data: availability } = await supabase
+            .from('staff_availability')
+            .select('user_id')
+            .limit(1)
+            .maybeSingle();
+
+        if (availability) {
+            staffId = availability.user_id;
+        }
+    }
+
+    if (!staffId) {
+        throw new Error('No staff member available to assign to this appointment');
+    }
+
     const record = {
         ...appointment,
-        staff_user_id: user?.id || null,
+        staff_user_id: staffId,
         duration_minutes: appointment.duration_minutes || 60,
         status: appointment.status || 'confirmed',
         payment_status: appointment.payment_status || 'pay_in_store',
@@ -57,6 +76,7 @@ export const createAppointment = async (appointment: Appointment): Promise<Appoi
 
     return data;
 };
+
 
 /**
  * Get all appointments for a specific date

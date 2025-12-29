@@ -20,6 +20,7 @@ function BookingPage() {
             setIsSubmitting(true);
             setError(null);
             // 1. Create Google Calendar booking + Email
+            // TODO: I think - Need to go this first as we need the googleEventId so we can cancel the appointment via the dashboard to the customers calendar
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),
@@ -31,27 +32,19 @@ function BookingPage() {
             }
 
             const { eventId } = await response.json();
-            console.log(`[Booking] Calendar Event Created: ${eventId}`);
 
             // 2. Save appointment to Database (Supabase)
             try {
-                const dbResponse = await fetch('/.netlify/functions/save-appointment', {
+                await fetch('/.netlify/functions/save-appointment', {
                     method: 'POST',
                     body: JSON.stringify({
                         bookingData: formData,
                         googleEventId: eventId
                     }),
                 });
-
-                if (dbResponse.ok) {
-                    const { appointmentId } = await dbResponse.json();
-                    console.log(`[Booking] Database Record Created: ${appointmentId}`);
-                } else {
-                    const dbError = await dbResponse.json();
-                    console.error('[Booking] Database record failed (non-critical):', dbError.message);
-                }
             } catch (dbErr) {
                 console.error('[Booking] Sequential DB call failed (non-critical):', dbErr);
+                // Sequential DB call failed (non-critical)
                 // We keep moving because the calendar event IS created
             }
             setBookingData(formData);

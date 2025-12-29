@@ -25,7 +25,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         bookingDetails: {
             date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             timeSlot: '',
-            payInStore: false,
+            payInStore: true,
         },
         customer: {
             name: 'A',

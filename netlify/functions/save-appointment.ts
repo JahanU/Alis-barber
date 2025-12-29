@@ -5,16 +5,9 @@
  * ACTIONS: Uses Supabase Service Role Key to bypass RLS.
  */
 import { Handler } from '@netlify/functions';
-import { createClient } from '@supabase/supabase-js';
 import { BookingData } from '../../src/services/googleCalendar';
 import { parseTimeSlot } from '../../src/utils/timeUtils';
-
-
-const supabase = createClient(
-    process.env.SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
+import { createAppointment, Appointment } from '../../src/services/appointmentService';
 
 export const handler: Handler = async (event) => {
     if (event.httpMethod !== 'POST') {
@@ -44,33 +37,21 @@ export const handler: Handler = async (event) => {
 
         console.log(`[save-appointment] Recording appointment in Supabase for ${customer.email}...`);
 
-        const { data: savedAppointment, error: supabaseError } = await supabase
-            .from('appointments')
-            .insert({
-                customer_name: customer.name,
-                customer_email: customer.email,
-                customer_phone: customer.phone,
-                service_id: service.id,
-                service_name: service.name,
-                service_price: Number(service.price),
-                appointment_date: date,
-                appointment_time: display24h,
-                payment_status: bookingDetails.stripePaymentPaid ? 'paid' : 'pay_in_store',
-                google_event_id: googleEventId,
-                status: 'confirmed',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
+        const appointment: Appointment = {
+            customer_name: customer.name,
+            customer_email: customer.email,
+            customer_phone: customer.phone,
+            service_id: service.id,
+            service_name: service.name,
+            service_price: Number(service.price),
+            appointment_date: date,
+            appointment_time: `${display24h}:00`, // Restore HH:MM:SS format for Supabase time type
+            payment_status: bookingDetails.stripePaymentPaid ? 'paid' : 'pay_in_store',
+            google_event_id: googleEventId,
+            status: 'confirmed',
+        };
 
-        if (supabaseError) {
-            console.error('[save-appointment] Supabase error:', supabaseError.message);
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ error: 'Supabase failed', message: supabaseError.message })
-            };
-        }
+        const savedAppointment = await createAppointment(appointment);
 
         return {
             statusCode: 200,

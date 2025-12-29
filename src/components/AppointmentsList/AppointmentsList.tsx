@@ -34,7 +34,6 @@ function AppointmentsList() {
 
             // 1. Cancel in Google Calendar if event ID exists
             if (appointment?.google_event_id) {
-                console.log('Cancelling Google Calendar event:', appointment.google_event_id);
                 try {
                     const response = await fetch('/.netlify/functions/cancel-booking', {
                         method: 'POST',
