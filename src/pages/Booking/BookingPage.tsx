@@ -70,7 +70,6 @@ function BookingPage() {
 
         if (sessionId && !isProcessingPayment.current) {
             isProcessingPayment.current = true; // Lock the door
-            setIsSubmitting(true); // Show the "Verifying" banner/spinner
 
             fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`)
                 .then(res => res.json())
@@ -85,9 +84,8 @@ function BookingPage() {
                 .catch(err => {
                     console.error('Payment error:', err);
                     setError(err.message);
-                    setIsSubmitting(false);
                     isProcessingPayment.current = false; // Unlock on failure
-                });
+                })
         }
     }, [handleBookingSubmit]);
 
@@ -144,14 +142,6 @@ function BookingPage() {
                     <div className="container">
                         <span>{error}</span>
                         <button onClick={() => setError(null)}>&times;</button>
-                    </div>
-                </div>
-            )}
-
-            {isSubmitting && (
-                <div className="error-banner" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                    <div className="container">
-                        <span>🔒 Verifying payment...</span>
                     </div>
                 </div>
             )}
