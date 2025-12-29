@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
@@ -6,22 +6,19 @@ import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationMo
 import { BookingData } from '../../services/googleCalendar';
 import { parseTimeSlot } from '../../utils/timeUtils';
 
-
-
 function BookingPage() {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingData, setBookingData] = useState<BookingData | null>(null);
     const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+    const isProcessingPayment = useRef(false);
 
+    // TODO review later on order of operations and async etc
     const handleBookingSubmit = useCallback(async (formData: BookingData) => {
         try {
             setIsSubmitting(true);
             setError(null);
-
-            // TODO review later on order of operations and async etc
             // 1. Create Google Calendar booking + Email
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
@@ -57,10 +54,7 @@ function BookingPage() {
                 console.error('[Booking] Sequential DB call failed (non-critical):', dbErr);
                 // We keep moving because the calendar event IS created
             }
-
             setBookingData(formData);
-
-
         } catch (err: any) {
             console.error('Booking error:', err);
             setError(err.message || 'An unexpected error occurred. Please try again.');
@@ -74,29 +68,25 @@ function BookingPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
-        if (sessionId) {
-            // Verify payment with backend
-            setIsVerifyingPayment(true);
+        if (sessionId && !isProcessingPayment.current) {
+            isProcessingPayment.current = true; // Lock the door
+            setIsSubmitting(true); // Show the "Verifying" banner/spinner
 
             fetch(`/.netlify/functions/verify-payment?session_id=${sessionId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.verified && data.bookingData) {
-                        // Clear URL params
                         window.history.replaceState({}, '', '/book');
-
-                        // Payment confirmed - create booking
                         handleBookingSubmit(data.bookingData);
                     } else {
-                        setError(data.error || 'Payment verification failed. Please contact support.');
+                        throw new Error(data.error || 'Payment verification failed.');
                     }
                 })
                 .catch(err => {
-                    console.error('Payment verification error:', err);
-                    setError('Failed to verify payment. Please contact support.');
-                })
-                .finally(() => {
-                    setIsVerifyingPayment(false);
+                    console.error('Payment error:', err);
+                    setError(err.message);
+                    setIsSubmitting(false);
+                    isProcessingPayment.current = false; // Unlock on failure
                 });
         }
     }, [handleBookingSubmit]);
@@ -158,7 +148,7 @@ function BookingPage() {
                 </div>
             )}
 
-            {isVerifyingPayment && (
+            {isSubmitting && (
                 <div className="error-banner" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                     <div className="container">
                         <span>🔒 Verifying payment...</span>
@@ -171,7 +161,7 @@ function BookingPage() {
                     <BookingForm
                         onSubmit={handleBookingSubmit}
                         onCancel={() => navigate('/')}
-                        isSubmitting={isSubmitting || isVerifyingPayment}
+                        isSubmitting={isSubmitting}
                     />
                 </div>
             </div>

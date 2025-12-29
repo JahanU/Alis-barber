@@ -23,7 +23,7 @@ interface FormData {
 function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormProps) {
     const [formData, setFormData] = useState<FormData>({
         bookingDetails: {
-            date: new Date().toISOString().split('T')[0],
+            date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             timeSlot: '',
             payInStore: false,
         },
