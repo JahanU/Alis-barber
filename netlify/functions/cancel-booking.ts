@@ -79,7 +79,7 @@ export const handler: Handler = async (event) => {
                                 <p><strong>Service:</strong> ${serviceName || 'N/A'}</p>
                                 <p><strong>Date:</strong> ${appointmentDate || 'N/A'}</p>
                             </div>
-                            <p>If you have any questions or would like to reschedule, please visit our website or reply to this email.</p>
+                            <p>If you have any questions or would like to reschedule, please visit our website to find our information.</p>
                             <p>Sorry for any inconvenience caused.</p>
                             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
                             <p style="font-size: 12px; color: #666;">This is an automated notification from your barber.</p>
