@@ -17,26 +17,3 @@ export const GOOGLE_CONFIG: GoogleConfig = {
   clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
   scopes: 'https://www.googleapis.com/auth/calendar.events',
 };
-
-// Calendar Event & Scheduling Settings
-export interface CalendarSettings {
-  calendarId: string;    // The Barber's email or 'primary' for the user's main calendar
-  eventDuration: number; // Length of a standard haircut (in hours)
-  businessHours: {
-    start: number;
-    end: number;
-  };
-  timeZone: string; // The local timezone for the shop
-}
-
-export const CALENDAR_SETTINGS: CalendarSettings = {
-  calendarId: 'primary',
-
-  eventDuration: 1,
-  businessHours: {
-    start: 9,  // 9 AM
-    end: 22,   // 10 PM
-  },
-
-  timeZone: 'Europe/London',
-};

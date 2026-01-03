@@ -95,11 +95,29 @@ function BookingPage() {
                 const endTime = new Date(startTime);
                 endTime.setHours(startTime.getHours() + 1);
 
+                const { service, bookingDetails } = bookingData!;
+                const paymentStatus = bookingDetails.payInStore
+                    ? 'Pay in store'
+                    : 'Paid online';
+
+                const priceDisplay = typeof service.price === 'number'
+                    ? `$${service.price.toFixed(2)}`
+                    : service.price;
+
+                const location = '63 Eastbank St, Southport, PR8 1EJ';
+
                 const event = {
-                    summary: `Barber Appointment - ${bookingData!.service}`,
-                    description: `Classic haircut appointment at Ali Barbers`,
+                    summary: `Barber Appointment - ${service.name}`,
+                    description: [
+                        `Service: ${service.name} (${service.duration}) - ${priceDisplay}`,
+                        `Payment: ${paymentStatus}`,
+                        `Date: ${startTime.toLocaleDateString()}`,
+                        `Time: ${bookingDetails.timeSlot}`,
+                        `Location: ${location}`
+                    ].join('\n'),
                     start: { dateTime: startTime.toISOString() },
                     end: { dateTime: endTime.toISOString() },
+                    location,
                 };
 
                 const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
