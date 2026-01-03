@@ -101,7 +101,7 @@ function BookingPage() {
                     : 'Paid online';
 
                 const priceDisplay = typeof service.price === 'number'
-                    ? `$${service.price.toFixed(2)}`
+                    ? `£${service.price.toFixed(2)}`
                     : service.price;
 
                 const location = '63 Eastbank St, Southport, PR8 1EJ';
@@ -113,7 +113,6 @@ function BookingPage() {
                         `Payment: ${paymentStatus}`,
                         `Date: ${startTime.toLocaleDateString()}`,
                         `Time: ${bookingDetails.timeSlot}`,
-                        `Location: ${location}`
                     ].join('\n'),
                     start: { dateTime: startTime.toISOString() },
                     end: { dateTime: endTime.toISOString() },
