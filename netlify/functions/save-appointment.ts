@@ -46,7 +46,7 @@ export const handler: Handler = async (event) => {
             service_price: Number(service.price),
             appointment_date: date,
             appointment_time: `${display24h}:00`, // Restore HH:MM:SS format for Supabase time type
-            payment_status: bookingDetails.stripePaymentPaid ? 'paid' : 'pay_in_store',
+            payment_status: bookingDetails.stripePaymentPaid ? 'paid_online' : 'pay_in_store',
             google_event_id: googleEventId,
             status: 'confirmed',
         };

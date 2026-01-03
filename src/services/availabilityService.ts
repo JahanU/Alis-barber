@@ -7,16 +7,20 @@
  */
 import { supabase } from '../config/supabaseClient';
 import { parseTimeSlot } from '../utils/timeUtils';
+import { getCurrentStaff } from './staffService';
 
 
 export interface StaffAvailability {
     id?: string;
-    user_id?: string;
+    staff_id?: string;
+    availability_type?: 'working_hours' | 'annual_leave';
     day_of_week: number; // 0 = Monday, 1 = Tuesday, ..., 6 = Sunday
+    specific_date?: string | null;
     start_time: string;  // HH:MM format (e.g., "09:00")
     end_time: string;    // HH:MM format (e.g., "17:00")
-    is_available: boolean;
-    label?: string;      // Optional label (e.g., "Morning", "Afternoon")
+    is_recurring?: boolean;
+    notes?: string | null;
+    end_date?: string | null;
 }
 
 // Day names for display - Monday first
@@ -26,9 +30,13 @@ export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
  * Get all availability records for the current user
  */
 export const getMyAvailability = async (): Promise<StaffAvailability[]> => {
+    const staff = await getCurrentStaff();
     const { data, error } = await supabase
         .from('staff_availability')
         .select('*')
+        .eq('staff_id', staff.id)
+        .eq('availability_type', 'working_hours')
+        .eq('is_recurring', true)
         .order('day_of_week')
         .order('start_time');
 
@@ -44,17 +52,15 @@ export const getMyAvailability = async (): Promise<StaffAvailability[]> => {
  * Save all availability ranges (replaces all existing for the user)
  */
 export const saveAllAvailability = async (availabilities: StaffAvailability[]): Promise<void> => {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
+    const staff = await getCurrentStaff();
 
     // Delete all existing availability for this user first
     const { error: deleteError } = await supabase
         .from('staff_availability')
         .delete()
-        .eq('user_id', user.id);
+        .eq('staff_id', staff.id)
+        .eq('availability_type', 'working_hours')
+        .eq('is_recurring', true);
 
     if (deleteError) {
         console.error('Error deleting old availability:', deleteError);
@@ -68,7 +74,9 @@ export const saveAllAvailability = async (availabilities: StaffAvailability[]): 
             const { id, ...rest } = a;
             return {
                 ...rest,
-                user_id: user.id,
+                staff_id: staff.id,
+                availability_type: 'working_hours',
+                is_recurring: true,
                 updated_at: new Date().toISOString(),
             };
         });
@@ -98,7 +106,8 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         .from('staff_availability')
         .select('*')
         .eq('day_of_week', dayOfWeek)
-        .eq('is_available', true)
+        .eq('availability_type', 'working_hours')
+        .eq('is_recurring', true)
         .order('start_time');
 
     if (error) {

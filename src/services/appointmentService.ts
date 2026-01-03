@@ -5,10 +5,12 @@
  * ACTIONS: Create, read, update, and cancel appointments
  */
 import { supabase } from '../config/supabaseClient';
+import { getCurrentStaff } from './staffService';
 
 export interface Appointment {
     id?: string;
-    staff_user_id?: string;
+    business_id?: string;
+    staff_id?: string;
     customer_name: string;
     customer_email: string;
     customer_phone: string;
@@ -19,8 +21,8 @@ export interface Appointment {
     appointment_time: string; // HH:MM:SS format (Supabase time type)
     duration_minutes?: number;
     status?: 'confirmed' | 'cancelled' | 'completed';
-    payment_status?: 'paid' | 'pay_in_store';
-    stripe_session_id?: string; // todo remove later
+    payment_status: 'paid_online' | 'pay_in_store';
+    notes?: string | null;
     google_event_id?: string;
     created_at?: string;
     updated_at?: string;
@@ -29,23 +31,25 @@ export interface Appointment {
 /**
  * Shared function to save an appointment record.
  * Can be called from frontend (anon client) or backend (service role client).
- * Automatically assigns staff_user_id if not provided.
+ * Automatically assigns staff_id if not provided.
  */
 
 // TODO: handle for multiple shops and staff members
 export const createAppointment = async (
     appointment: Appointment): Promise<Appointment> => {
-    let staffId = appointment.staff_user_id;
+    let staffId = appointment.staff_id;
     if (!staffId) {
         // Look for the first staff member who has availability set
         const { data: availability } = await supabase
             .from('staff_availability')
-            .select('user_id')
+            .select('staff_id')
+            .eq('availability_type', 'working_hours')
+            .eq('is_recurring', true)
             .limit(1)
             .maybeSingle();
 
         if (availability) {
-            staffId = availability.user_id;
+            staffId = availability.staff_id;
         }
     }
 
@@ -53,12 +57,27 @@ export const createAppointment = async (
         throw new Error('No staff member available to assign to this appointment');
     }
 
+    let businessId = appointment.business_id;
+    if (!businessId) {
+        const { data: staff, error: staffError } = await supabase
+            .from('staff')
+            .select('business_id')
+            .eq('id', staffId)
+            .single();
+
+        if (staffError || !staff) {
+            throw staffError ?? new Error('Failed to resolve business for staff');
+        }
+
+        businessId = staff.business_id;
+    }
+
     const record = {
         ...appointment,
-        staff_user_id: staffId,
+        staff_id: staffId,
+        business_id: businessId,
         duration_minutes: appointment.duration_minutes || 60,
         status: appointment.status || 'confirmed',
-        payment_status: appointment.payment_status || 'pay_in_store',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
     };
@@ -122,16 +141,12 @@ export const getAppointmentsForDateRange = async (startDate: string, endDate: st
  * Get all appointments for the current staff user
  */
 export const getMyAppointments = async (): Promise<Appointment[]> => {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        throw new Error('User not authenticated');
-    }
+    const staff = await getCurrentStaff();
 
     const { data, error } = await supabase
         .from('appointments')
         .select('*')
-        .eq('staff_user_id', user.id)
+        .eq('staff_id', staff.id)
         .order('appointment_date', { ascending: false })
         .order('appointment_time');
 
@@ -178,27 +193,6 @@ export const updateAppointmentStatus = async (
 
     if (error) {
         console.error('Error updating appointment status:', error);
-        throw error;
-    }
-};
-
-/**
- * Update appointment with Google Calendar event ID
- */
-export const updateAppointmentGoogleId = async (
-    appointmentId: string,
-    googleEventId: string
-): Promise<void> => {
-    const { error } = await supabase
-        .from('appointments')
-        .update({
-            google_event_id: googleEventId,
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', appointmentId);
-
-    if (error) {
-        console.error('Error updating Google event ID:', error);
         throw error;
     }
 };
