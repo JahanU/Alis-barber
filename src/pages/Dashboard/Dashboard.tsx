@@ -78,7 +78,8 @@ function Dashboard() {
                         day_of_week: dayIndex,
                         start_time: '09:00',
                         end_time: '17:00',
-                        is_available: true,
+                        // TODO ?
+                        // is_available: true,
                     }]
                 }
                 : day
