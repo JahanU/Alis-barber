@@ -73,9 +73,25 @@ export const handler: Handler = async (event) => {
         const endDateTime = new Date(startDateTime);
         endDateTime.setHours(startDateTime.getHours() + 1);
 
+        const paymentStatus = bookingDetails.payInStore
+            ? 'Pay in store'
+            : 'Paid online';
+
+        const priceDisplay = typeof service.price === 'number'
+            ? `£${service.price.toFixed(2)}`
+            : service.price;
+
         const calendarEvent = {
             summary: `Barber Appointment - ${service.name}`,
-            description: `Customer: ${customer.name}\nEmail: ${customer.email}\nPhone: ${customer.phone}\nService: ${service.name}`,
+            description: [
+                `Customer: ${customer.name}`,
+                `Email: ${customer.email}`,
+                `Phone: ${customer.phone}`,
+                `Service: ${service.name} (${service.duration}) - ${priceDisplay}`,
+                `Payment Status: ${paymentStatus}`,
+                `Date: ${date}`,
+                `Time: ${timeSlot}`,
+            ].join('\n'),
             start: {
                 dateTime: startDateTime.toISOString(),
                 timeZone: 'Europe/London',
@@ -144,4 +160,3 @@ export const handler: Handler = async (event) => {
         };
     }
 };
-

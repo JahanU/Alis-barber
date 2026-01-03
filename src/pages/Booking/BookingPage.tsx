@@ -95,9 +95,24 @@ function BookingPage() {
                 const endTime = new Date(startTime);
                 endTime.setHours(startTime.getHours() + 1);
 
+                const { service, bookingDetails } = bookingData!;
+                const paymentStatus = bookingDetails.payInStore
+                    ? 'Pay in store'
+                    : 'Paid online';
+
+                const priceDisplay = typeof service.price === 'number'
+                    ? `$${service.price.toFixed(2)}`
+                    : service.price;
+
                 const event = {
-                    summary: `Barber Appointment - ${bookingData!.service}`,
-                    description: `Classic haircut appointment at Ali Barbers`,
+                    summary: `Barber Appointment - ${service.name}`,
+                    description: [
+                        `Service: ${service.name} (${service.duration}) - ${priceDisplay}`,
+                        `Payment: ${paymentStatus}`,
+                        `Date: ${startTime.toLocaleDateString()}`,
+                        `Time: ${bookingDetails.timeSlot}`,
+                        'Location: Ali\'s Barber'
+                    ].join('\n'),
                     start: { dateTime: startTime.toISOString() },
                     end: { dateTime: endTime.toISOString() },
                 };
