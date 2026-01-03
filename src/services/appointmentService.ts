@@ -98,25 +98,6 @@ export const createAppointment = async (
 
 
 /**
- * Get all appointments for a specific date
- */
-export const getAppointmentsForDate = async (date: string): Promise<Appointment[]> => {
-    const { data, error } = await supabase
-        .from('appointments')
-        .select('*')
-        .eq('appointment_date', date)
-        .eq('status', 'confirmed')
-        .order('appointment_time');
-
-    if (error) {
-        console.error('Error fetching appointments:', error);
-        throw error;
-    }
-
-    return data || [];
-};
-
-/**
  * Get appointments for a date range (for calendar view)
  */
 export const getAppointmentsForDateRange = async (startDate: string, endDate: string): Promise<Appointment[]> => {
@@ -174,45 +155,4 @@ export const cancelAppointment = async (appointmentId: string): Promise<void> =>
         console.error('Error cancelling appointment:', error);
         throw error;
     }
-};
-
-/**
- * Update appointment status
- */
-export const updateAppointmentStatus = async (
-    appointmentId: string,
-    status: 'confirmed' | 'cancelled' | 'completed'
-): Promise<void> => {
-    const { error } = await supabase
-        .from('appointments')
-        .update({
-            status,
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', appointmentId);
-
-    if (error) {
-        console.error('Error updating appointment status:', error);
-        throw error;
-    }
-};
-
-/**
- * Check if a specific time slot is already booked
- */
-export const isSlotBooked = async (date: string, time: string): Promise<boolean> => {
-    const { data, error } = await supabase
-        .from('appointments')
-        .select('id')
-        .eq('appointment_date', date)
-        .eq('appointment_time', time)
-        .eq('status', 'confirmed')
-        .limit(1);
-
-    if (error) {
-        console.error('Error checking slot:', error);
-        return false;
-    }
-
-    return (data && data.length > 0);
 };
