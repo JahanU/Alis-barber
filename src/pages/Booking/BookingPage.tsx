@@ -104,6 +104,8 @@ function BookingPage() {
                     ? `$${service.price.toFixed(2)}`
                     : service.price;
 
+                const location = '63 Eastbank St, Southport, PR8 1EJ';
+
                 const event = {
                     summary: `Barber Appointment - ${service.name}`,
                     description: [
@@ -111,10 +113,11 @@ function BookingPage() {
                         `Payment: ${paymentStatus}`,
                         `Date: ${startTime.toLocaleDateString()}`,
                         `Time: ${bookingDetails.timeSlot}`,
-                        'Location: Ali\'s Barber'
+                        `Location: ${location}`
                     ].join('\n'),
                     start: { dateTime: startTime.toISOString() },
                     end: { dateTime: endTime.toISOString() },
+                    location,
                 };
 
                 const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
