@@ -40,7 +40,7 @@ A beautiful, modern web application for barber shop appointments with Google Cal
 
 3. Set up Google Calendar API
    - Follow the detailed guide in [GOOGLE_CALENDAR_SETUP.md](./GOOGLE_CALENDAR_SETUP.md)
-   - Update `src/config/calendar.js` with your Client ID
+   - Add your Google Calendar service account credentials to `.env`
 
 4. Set up Supabase Authentication
    - Follow the detailed guide in [SUPABASE_AUTH.md](./SUPABASE_AUTH.md)
@@ -59,7 +59,6 @@ A beautiful, modern web application for barber shop appointments with Google Cal
 - **[Vite](https://vite.dev/)** - Build tool and dev server
 - **[Supabase](https://supabase.com/)** - Authentication and backend-as-a-service
 - **[Google Calendar API](https://developers.google.com/calendar)** - Calendar integration
-- **[@react-oauth/google](https://www.npmjs.com/package/@react-oauth/google)** - Google OAuth
 - **[gapi-script](https://www.npmjs.com/package/gapi-script)** - Google API client
 - **[date-fns](https://date-fns.org/)** - Date manipulation
 - **[React Icons](https://react-icons.github.io/react-icons/)** - Icon library
@@ -152,7 +151,7 @@ npm install -g netlify-cli
 netlify deploy
 ```
 
-> **Important**: Don't forget to update your Google OAuth settings with production URLs!
+> **Important**: Ensure your Google Calendar environment variables are set correctly for production.
 
 ## 📸 Screenshots
 
@@ -166,15 +165,14 @@ netlify deploy
 4. **Selects** desired service from available options
 5. **Chooses** date and time slot
 6. **Confirms** the booking
-7. **Adds to Calendar** - Google Calendar event is created automatically
+7. **Adds to Calendar** - Calendar event is created automatically and a .ics file is provided for personal calendars
 8. **Receives** email reminders (1 day before and 1 hour before)
 
 ## 🔐 Security & Privacy
 
-- Uses OAuth 2.0 for secure Google authentication
-- No passwords stored - Google handles authentication
+- Calendar writes use a server-side Google service account; no customer OAuth required
+- No passwords stored; minimal data stored only for appointment booking
 - Calendar access is scoped to event creation only
-- Customer data used only for appointment booking
 
 ## 🐛 Troubleshooting
 

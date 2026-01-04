@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGoogleLogin } from '@react-oauth/google';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
 import { BookingData } from '../../services/googleCalendar';
-import { parseTimeSlot } from '../../utils/timeUtils';
+import { buildCalendarInvite } from '../../utils/calendarInvite';
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -82,68 +81,37 @@ function BookingPage() {
         }
     }, [handleBookingSubmit]);
 
-    const googleLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                setIsAddingToCalendar(true);
+    const handleAddToCalendar = useCallback(() => {
+        if (!bookingData) return;
 
-                const startTime = new Date(bookingData!.bookingDetails.date);
-                const { hours, minutes } = parseTimeSlot(bookingData!.bookingDetails.timeSlot);
-                startTime.setHours(hours, minutes, 0, 0);
+        setIsAddingToCalendar(true);
 
+        let downloadUrl: string | null = null;
+        try {
+            const { filename, content } = buildCalendarInvite(bookingData);
+            const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+            downloadUrl = URL.createObjectURL(blob);
 
-                const endTime = new Date(startTime);
-                endTime.setHours(startTime.getHours() + 1);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
 
-                const { service, bookingDetails } = bookingData!;
-                const paymentStatus = bookingDetails.payInStore
-                    ? 'Pay in store'
-                    : 'Paid online';
-
-                const priceDisplay = typeof service.price === 'number'
-                    ? `£${service.price.toFixed(2)}`
-                    : service.price;
-
-                const location = '63 Eastbank St, Southport, PR8 1EJ';
-
-                const event = {
-                    summary: `Barber Appointment - ${service.name}`,
-                    description: [
-                        `Service: ${service.name} (${service.duration}) - ${priceDisplay}`,
-                        `Payment: ${paymentStatus}`,
-                        `Date: ${startTime.toLocaleDateString()}`,
-                        `Time: ${bookingDetails.timeSlot}`,
-                    ].join('\n'),
-                    start: { dateTime: startTime.toISOString() },
-                    end: { dateTime: endTime.toISOString() },
-                    location,
-                };
-
-                const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${tokenResponse.access_token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(event),
-                });
-
-                if (response.ok) {
-                    alert('Successfully added to your Google Calendar!');
-                } else {
-                    throw new Error('Failed to add to calendar');
-                }
-            } catch (err) {
-                console.error('Calendar error:', err);
-                alert('Heads up: Booking was successful, but we couldn\'t add it to your calendar.');
-            } finally {
-                setIsAddingToCalendar(false);
-                setBookingData(null);
-                navigate('/');
+            alert('Calendar file downloaded. Import it into your calendar app to save the appointment.');
+            setBookingData(null);
+            navigate('/');
+        } catch (err) {
+            console.error('Calendar file error:', err);
+            setError('Booking completed, but we could not generate the calendar file. Please try again.');
+        } finally {
+            if (downloadUrl) {
+                URL.revokeObjectURL(downloadUrl);
             }
-        },
-        scope: 'https://www.googleapis.com/auth/calendar.events',
-    });
+            setIsAddingToCalendar(false);
+        }
+    }, [bookingData, navigate]);
 
     return (
         <div className="booking-page-wrapper">
@@ -173,7 +141,7 @@ function BookingPage() {
                         setBookingData(null);
                         navigate('/');
                     }}
-                    onAddToCalendar={() => googleLogin()}
+                    onAddToCalendar={handleAddToCalendar}
                     isAddingToCalendar={isAddingToCalendar}
                 />
             )}
