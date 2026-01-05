@@ -1,6 +1,7 @@
 import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from './timeUtils';
 
+// TODO from config
 const LOCATION = '63 Eastbank St, Southport, PR8 1EJ';
 
 const formatICSDate = (date: Date) =>
