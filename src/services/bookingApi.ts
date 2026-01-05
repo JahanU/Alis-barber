@@ -4,7 +4,7 @@
  * ROLE: Connects the React frontend to the Netlify backend functions.
  * ACTIONS: Sends booking data from the form to the 'create-booking' server-side function.
  */
-import { BookingData } from './googleCalendar';
+import { BookingData } from '../config/booking-types';
 
 export const createBooking = async (bookingData: BookingData) => {
     try {

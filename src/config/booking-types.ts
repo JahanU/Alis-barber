@@ -25,3 +25,9 @@ export interface BookingDetails {
     payInStore: boolean;
     stripePaymentPaid?: boolean; // If paid via stripe, I add this to the booking data
 }
+
+export type BookingData = {
+    customer: Customer;
+    service: Service;
+    bookingDetails: BookingDetails;
+};

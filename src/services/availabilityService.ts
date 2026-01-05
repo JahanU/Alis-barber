@@ -6,17 +6,59 @@
 import { supabase } from '../config/supabaseClient';
 import { parseTimeSlot } from '../utils/timeUtils';
 
+// TODO to fetch for business and per staff
+const getDefaultStaffId = async (): Promise<string | null> => {
+    const { data, error } = await supabase
+        .from('staff')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        console.error('Error fetching default staff:', error);
+        return null;
+    }
+
+    return data?.id ?? null;
+};
+
 /**
  * Get available time slots for a specific date based on staff availability.
  * Merges slots from all time ranges for the day and excludes booked appointments.
  */
 export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<string[]> => {
+    const staffId = await getDefaultStaffId();
+    if (!staffId) {
+        console.warn('No staff found; cannot compute availability.');
+        return [];
+    }
+
     const jsDay = selectedDate.getDay();
     const dayOfWeek = (jsDay + 6) % 7; // convert JS day to Monday-first index
+    const dateString = selectedDate.toISOString().split('T')[0];
 
+    // Block out annual leave for this staff member on the selected date
+    const { data: leave, error: leaveError } = await supabase
+        .from('staff_availability')
+        .select('id')
+        .eq('staff_id', staffId)
+        .eq('availability_type', 'annual_leave')
+        .eq('specific_date', dateString)
+        .maybeSingle();
+
+    if (leaveError) {
+        console.error('Error fetching annual leave:', leaveError);
+    }
+
+    if (leave) {
+        return [];
+    }
+
+    // Fetch recurring working hours for the staff member
     const { data, error } = await supabase
         .from('staff_availability')
         .select('*')
+        .eq('staff_id', staffId)
         .eq('day_of_week', dayOfWeek)
         .eq('availability_type', 'working_hours')
         .eq('is_recurring', true)
@@ -52,7 +94,6 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         }
     }
 
-    const dateString = selectedDate.toISOString().split('T')[0];
     const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
         .select('appointment_time')

@@ -8,7 +8,7 @@
 import { Handler } from '@netlify/functions';
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
-import { BookingData } from '../../src/services/googleCalendar';
+import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from '../../src/utils/timeUtils';
 
 

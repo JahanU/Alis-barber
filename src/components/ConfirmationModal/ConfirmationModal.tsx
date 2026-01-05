@@ -1,4 +1,4 @@
-import { BookingData } from '../../services/googleCalendar';
+import { BookingData } from '../../../src/config/booking-types';
 import './ConfirmationModal.css';
 
 
