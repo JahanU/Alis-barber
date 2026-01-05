@@ -6,7 +6,6 @@
 import { supabase } from '../config/supabaseClient';
 import { parseTimeSlot } from '../utils/timeUtils';
 
-// TODO to fetch for business and per staff
 const getDefaultStaffId = async (): Promise<string | null> => {
     const { data, error } = await supabase
         .from('staff')
@@ -37,20 +36,19 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
     const dayOfWeek = (jsDay + 6) % 7; // convert JS day to Monday-first index
     const dateString = selectedDate.toISOString().split('T')[0];
 
-    // Block out annual leave for this staff member on the selected date
-    const { data: leave, error: leaveError } = await supabase
+    // Block out annual leave for this staff member on the selected date (supports ranges)
+    const { data: leaveRows, error: leaveError } = await supabase
         .from('staff_availability')
-        .select('id')
+        .select('specific_date,end_date')
         .eq('staff_id', staffId)
         .eq('availability_type', 'annual_leave')
-        .eq('specific_date', dateString)
-        .maybeSingle();
+        .or(`specific_date.eq.${dateString},and(specific_date.lte.${dateString},end_date.gte.${dateString})`);
 
     if (leaveError) {
         console.error('Error fetching annual leave:', leaveError);
     }
 
-    if (leave) {
+    if (leaveRows && leaveRows.length > 0) {
         return [];
     }
 
