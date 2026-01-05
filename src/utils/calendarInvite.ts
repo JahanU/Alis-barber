@@ -1,4 +1,4 @@
-import { BookingData } from '../services/googleCalendar';
+import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from './timeUtils';
 
 const LOCATION = '63 Eastbank St, Southport, PR8 1EJ';

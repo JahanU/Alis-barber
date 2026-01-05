@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
-import { BookingData } from '../../services/googleCalendar';
+import { BookingData } from '../../../src/config/booking-types';
 import { buildCalendarInvite } from '../../utils/calendarInvite';
 
 function BookingPage() {
@@ -19,7 +19,6 @@ function BookingPage() {
             setIsSubmitting(true);
             setError(null);
             // 1. Create Google Calendar booking + Email
-            // TODO: We need the Google event ID so cancellations can reflect on the customer's calendar
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),

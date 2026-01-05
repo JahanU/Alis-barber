@@ -5,7 +5,7 @@
  * ACTIONS: Uses Supabase Service Role Key to bypass RLS.
  */
 import { Handler } from '@netlify/functions';
-import { BookingData } from '../../src/services/googleCalendar';
+import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from '../../src/utils/timeUtils';
 import { createAppointment, Appointment } from '../../src/services/appointmentService';
 

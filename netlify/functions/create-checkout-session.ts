@@ -6,7 +6,7 @@
  */
 import { Handler } from '@netlify/functions';
 import Stripe from 'stripe';
-import { BookingData } from '../../src/services/googleCalendar';
+import { BookingData } from '../../src/config/booking-types';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
