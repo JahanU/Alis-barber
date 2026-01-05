@@ -84,7 +84,7 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
                         {isAddingToCalendar ? (
                             <>
                                 <span className="spinner"></span>
-                                Adding to Calendar...
+                                Preparing Calendar...
                             </>
                         ) : (
                             <>
@@ -92,7 +92,7 @@ function ConfirmationModal({ bookingDetails, onClose, onAddToCalendar, isAddingT
                                     <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
                                     <path d="M7 2V6M13 2V6M3 8H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                 </svg>
-                                Add to Google Calendar
+                                Download Calendar Invite
                             </>
                         )}
                     </button>

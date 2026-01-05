@@ -12,7 +12,6 @@
     "packageJson": {
       "dependencies": [
         "npm:@eslint/js@^9.39.1",
-        "npm:@react-oauth/google@~0.12.2",
         "npm:@types/gapi.auth2@^0.0.61",
         "npm:@types/gapi.calendar@^3.0.11",
         "npm:@types/gapi@^0.0.47",
