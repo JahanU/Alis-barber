@@ -15,7 +15,6 @@ A beautiful, modern web application for barber shop appointments with Google Cal
 - ✂️ **Service Selection** - Multiple barber services with visual selection
 - 🕐 **Time Slot Booking** - Easy 1-hour slot selection (9 AM - 6 PM)
 - ✅ **Form Validation** - Real-time validation with helpful error messages
-- 🔐 **Staff Authentication** - Secure staff-only login powered by Supabase
 - 🎭 **Glassmorphism Design** - Modern UI effects with backdrop blur
 
 ## 🚀 Getting Started
@@ -42,9 +41,9 @@ A beautiful, modern web application for barber shop appointments with Google Cal
    - Follow the detailed guide in [GOOGLE_CALENDAR_SETUP.md](./GOOGLE_CALENDAR_SETUP.md)
    - Add your Google Calendar service account credentials to `.env`
 
-4. Set up Supabase Authentication
-   - Follow the detailed guide in [SUPABASE_AUTH.md](./SUPABASE_AUTH.md)
-   - Add your credentials to `.env.local`
+4. Set up Supabase access
+   - Provide your Supabase URL and service role key in `.env.local`
+   - Ensure your Supabase tables (appointments, staff, staff_availability) are created
 
 4. Start the development server
    ```bash
@@ -57,7 +56,7 @@ A beautiful, modern web application for barber shop appointments with Google Cal
 
 - **[React](https://react.dev/)** - UI library
 - **[Vite](https://vite.dev/)** - Build tool and dev server
-- **[Supabase](https://supabase.com/)** - Authentication and backend-as-a-service
+- **[Supabase](https://supabase.com/)** - Database and backend-as-a-service
 - **[Google Calendar API](https://developers.google.com/calendar)** - Calendar integration
 - **[gapi-script](https://www.npmjs.com/package/gapi-script)** - Google API client
 - **[date-fns](https://date-fns.org/)** - Date manipulation
@@ -185,7 +184,6 @@ See [GOOGLE_CALENDAR_SETUP.md](./GOOGLE_CALENDAR_SETUP.md) for common issues and
 - [ ] Multiple barber selection
 - [ ] Email notifications via backend
 - [ ] Customer booking history
-- [ ] Admin dashboard
 - [ ] SMS reminders
 - [ ] Payment integration
 

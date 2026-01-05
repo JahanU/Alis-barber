@@ -19,7 +19,7 @@ function BookingPage() {
             setIsSubmitting(true);
             setError(null);
             // 1. Create Google Calendar booking + Email
-            // TODO: I think - Need to go this first as we need the googleEventId so we can cancel the appointment via the dashboard to the customers calendar
+            // TODO: We need the Google event ID so cancellations can reflect on the customer's calendar
             const response = await fetch('/.netlify/functions/create-booking', {
                 method: 'POST',
                 body: JSON.stringify(formData),
