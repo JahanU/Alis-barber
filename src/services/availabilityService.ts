@@ -6,6 +6,7 @@
 import { supabase } from '../config/supabaseClient';
 import { parseTimeSlot } from '../utils/timeUtils';
 
+// TODO to fetch for business and per staff
 const getDefaultStaffId = async (): Promise<string | null> => {
     const { data, error } = await supabase
         .from('staff')
