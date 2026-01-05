@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './BookingForm.css';
 import { Customer, BookingDetails, Service } from '../../config/booking-types';
-import { BookingData } from '../../src/config/booking-types';
+import { BookingData } from '../../../src/config/booking-types';
 import { getAvailableSlotsForDate } from '../../services/availabilityService';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 import { SERVICES } from '../../config/services';
