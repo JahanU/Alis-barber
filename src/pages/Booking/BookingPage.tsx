@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
-import { BookingData } from '../../../src/config/booking-types';
+import { BookingData } from '../../config/booking-types';
 import { buildCalendarInvite } from '../../utils/calendarInvite';
 
 function BookingPage() {
@@ -13,42 +13,79 @@ function BookingPage() {
     const [error, setError] = useState<string | null>(null);
     const isProcessingPayment = useRef(false);
 
-    // TODO review later on order of operations and async etc
     const handleBookingSubmit = useCallback(async (formData: BookingData) => {
         try {
             setIsSubmitting(true);
             setError(null);
-            // 1. Create Google Calendar booking + Email
-            const response = await fetch('/.netlify/functions/create-booking', {
+            let appointmentId: string | null = null;
+
+            // 1) Save appointment first (critical) with no Google event yet
+            const saveResponse = await fetch('/.netlify/functions/save-appointment', {
                 method: 'POST',
-                body: JSON.stringify(formData),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingData: formData,
+                    googleEventId: null
+                }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to create booking');
+            if (!saveResponse.ok) {
+                let message = 'Failed to save booking';
+                try {
+                    const errorData = await saveResponse.json();
+                    message = errorData.message || message;
+                } catch (parseErr) {
+                    console.warn('Failed to parse save-appointment error response:', parseErr);
+                }
+                throw new Error(message);
             }
 
-            const { eventId } = await response.json();
+            const saveData = await saveResponse.json();
+            appointmentId = saveData?.appointmentId || null;
 
-            // 2. Save appointment to Database (Supabase)
-            try {
-                await fetch('/.netlify/functions/save-appointment', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        bookingData: formData,
-                        googleEventId: eventId
-                    }),
-                });
-            } catch (dbErr) {
-                console.error('[Booking] Sequential DB call failed (non-critical):', dbErr);
-                // Sequential DB call failed (non-critical)
-                // We keep moving because the calendar event IS created
-            }
-            setBookingData(formData);
+            setBookingData(formData); // confirmation shown after successful save
+
+            // 2) In background, create Google Calendar event & send email
+            void fetch('/.netlify/functions/create-booking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            }).then(async response => {
+                if (!response.ok) {
+                    let message = 'Booking saved, but calendar/email failed.';
+                    try {
+                        const errorData = await response.json();
+                        message = errorData.message || message;
+                    } catch (parseErr) {
+                        console.warn('Failed to parse create-booking error response:', parseErr);
+                    }
+                    setError(message);
+                    return;
+                }
+
+                const { eventId } = await response.json();
+
+                // 3) Update appointment with Google Event ID
+                if (appointmentId && eventId) {
+                    void fetch('/.netlify/functions/update-appointment-google-id', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            appointmentId,
+                            googleEventId: eventId,
+                        }),
+                    }).catch(updateErr => {
+                        console.warn('Failed to update appointment with Google event ID:', updateErr);
+                    });
+                }
+            }).catch(calendarErr => {
+                console.error('Background calendar creation failed:', calendarErr);
+                setError('Booking saved, but we could not add it to the calendar.');
+            });
         } catch (err: any) {
             console.error('Booking error:', err);
             setError(err.message || 'An unexpected error occurred. Please try again.');
+            setBookingData(null);
         } finally {
             setIsSubmitting(false);
         }
