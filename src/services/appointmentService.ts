@@ -4,10 +4,11 @@
  * ROLE: Create appointment records in Supabase.
  */
 import { supabase } from '../config/supabaseClient';
+import { BUSINESS_ID } from '../config/business';
 
 export interface Appointment {
     id?: string;
-    business_id?: string;
+    business_id: string;
     staff_id?: string;
     customer_name: string;
     customer_email: string;
@@ -28,48 +29,34 @@ export interface Appointment {
 
 /**
  * Create an appointment record.
- * If staff_id/business_id are missing, they are resolved from existing availability and staff records.
+ * Business ID is required and provided via configuration; staff_id is resolved for the business when not provided.
  */
 export const createAppointment = async (appointment: Appointment): Promise<Appointment> => {
+    const businessId = appointment.business_id || BUSINESS_ID;
+
     let staffId = appointment.staff_id;
-
     if (!staffId) {
-        const { data: availability } = await supabase
-            .from('staff_availability')
-            .select('staff_id')
-            .eq('availability_type', 'working_hours')
-            .eq('is_recurring', true)
-            .limit(1)
-            .maybeSingle();
-
-        if (availability) {
-            staffId = availability.staff_id;
-        }
-    }
-
-    if (!staffId) {
-        throw new Error('No staff member available to assign to this appointment');
-    }
-
-    let businessId = appointment.business_id;
-    if (!businessId) {
-        const { data: staff, error: staffError } = await supabase
+        const { data: staffRows, error: staffError } = await supabase
             .from('staff')
-            .select('business_id')
-            .eq('id', staffId)
-            .single();
+            .select('id')
+            .eq('business_id', businessId)
+            .limit(1);
 
-        if (staffError || !staff) {
-            throw staffError ?? new Error('Failed to resolve business for staff');
+        if (staffError) {
+            throw staffError;
         }
 
-        businessId = staff.business_id;
+        if (!staffRows || staffRows.length === 0) {
+            throw new Error('No staff available for the configured business.');
+        }
+
+        staffId = staffRows[0].id;
     }
 
     const record = {
         ...appointment,
-        staff_id: staffId,
         business_id: businessId,
+        staff_id: staffId,
         duration_minutes: appointment.duration_minutes || 60,
         status: appointment.status || 'confirmed',
         created_at: new Date().toISOString(),

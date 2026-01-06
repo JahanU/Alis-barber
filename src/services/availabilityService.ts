@@ -5,11 +5,13 @@
  */
 import { supabase } from '../config/supabaseClient';
 import { parseTimeSlot } from '../utils/timeUtils';
+import { BUSINESS_ID } from '../config/business';
 
 const getDefaultStaffId = async (): Promise<string | null> => {
     const { data, error } = await supabase
         .from('staff')
         .select('id')
+        .eq('business_id', BUSINESS_ID)
         .limit(1)
         .maybeSingle();
 
@@ -96,7 +98,8 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         .from('appointments')
         .select('appointment_time')
         .eq('appointment_date', dateString)
-        .eq('status', 'confirmed');
+        .eq('status', 'confirmed')
+        .eq('business_id', BUSINESS_ID);
 
     if (appointmentsError) {
         console.error('Error fetching appointments:', appointmentsError);
