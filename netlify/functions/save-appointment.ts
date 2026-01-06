@@ -16,7 +16,7 @@ export const handler: Handler = async (event) => {
     }
 
     try {
-        const requiredEnv = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
+        const requiredEnv = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_SERVICE_ROLE_KEY'];
         const missing = requiredEnv.filter(key => !process.env[key]);
         if (missing.length > 0) {
             throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
