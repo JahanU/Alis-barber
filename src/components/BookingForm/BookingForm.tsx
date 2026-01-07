@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import './BookingForm.css';
-import { Customer, BookingDetails, Service } from '../../config/booking-types';
-import { BookingData } from '../../../src/config/booking-types';
+import { Customer, BookingDetails, Service, BookingData } from '../../config/booking-types';
 import { getAvailableSlotsForDate } from '../../services/availabilityService';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 import { SERVICES } from '../../config/services';
+import { formatDuration } from '../../utils/duration';
 
 interface BookingFormProps {
     onSubmit: (data: BookingData) => void;
@@ -33,7 +33,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         service: {
             id: '',
             name: '',
-            duration: '',
+            duration: 0,
             price: 0,
             description: '',
             category: 'inShop',
@@ -290,7 +290,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                                     <div className="service-content">
                                         <span className="service-name">{service.name}</span>
                                         <div className="service-details">
-                                            <span className="service-duration">{service.duration}</span>
+                                            <span className="service-duration">{formatDuration(service.duration)}</span>
                                             <span className="service-price">£{service.price}</span>
                                         </div>
                                     </div>
@@ -326,6 +326,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             selectedSlot={formData.bookingDetails.timeSlot}
                             onSlotSelect={handleSlotSelect}
                             availableSlots={availableSlots}
+                            durationMinutes={formData.service.duration || 30}
                         />
                     )}
                     {errors['bookingDetails.timeSlot'] && <span className="error-message">{errors['bookingDetails.timeSlot']}</span>}

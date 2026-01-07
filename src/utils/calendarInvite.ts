@@ -1,5 +1,6 @@
 import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from './timeUtils';
+import { formatDuration } from './duration';
 
 // TODO from config
 const LOCATION = '63 Eastbank St, Southport, PR8 1EJ';
@@ -21,8 +22,10 @@ export function buildCalendarInvite(booking: BookingData): { filename: string; c
     const startTime = new Date(bookingDetails.date);
     startTime.setHours(hours, minutes, 0, 0);
 
+    const durationMinutes = service.duration || 30;
+
     const endTime = new Date(startTime);
-    endTime.setHours(startTime.getHours() + 1);
+    endTime.setMinutes(startTime.getMinutes() + durationMinutes);
 
     const paymentStatus = bookingDetails.payInStore ? 'Pay in store' : 'Paid online';
     const priceDisplay = typeof service.price === 'number' ? `£${service.price.toFixed(2)}` : service.price;
@@ -32,7 +35,7 @@ export function buildCalendarInvite(booking: BookingData): { filename: string; c
         `Customer: ${customer.name}`,
         `Email: ${customer.email}`,
         `Phone: ${customer.phone}`,
-        `Service: ${service.name} (${service.duration}) - ${priceDisplay}`,
+        `Service: ${service.name} (${formatDuration(durationMinutes)}) - ${priceDisplay}`,
         `Payment Status: ${paymentStatus}`,
         `Date: ${startTime.toLocaleDateString()}`,
         `Time: ${bookingDetails.timeSlot}`,

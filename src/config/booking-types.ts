@@ -7,7 +7,7 @@
 export interface Service {
     id: string;
     name: string;
-    duration: string;
+    duration: number;
     price: number;
     description: string;
     category: 'inShop' | 'home';

@@ -57,7 +57,7 @@ export const createAppointment = async (appointment: Appointment): Promise<Appoi
         ...appointment,
         business_id: businessId,
         staff_id: staffId,
-        duration_minutes: appointment.duration_minutes || 60,
+        duration_minutes: appointment.duration_minutes,
         status: appointment.status || 'confirmed',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

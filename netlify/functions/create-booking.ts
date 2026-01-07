@@ -10,6 +10,7 @@ import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
 import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from '../../src/utils/timeUtils';
+import { formatDuration } from '../../src/utils/duration';
 
 
 
@@ -70,8 +71,10 @@ export const handler: Handler = async (event) => {
         const startDateTime = new Date(date);
         startDateTime.setHours(hours, minutes, 0, 0);
 
+        const durationMinutes = service.duration || 30;
+
         const endDateTime = new Date(startDateTime);
-        endDateTime.setHours(startDateTime.getHours() + 1);
+        endDateTime.setMinutes(startDateTime.getMinutes() + durationMinutes);
 
         const paymentStatus = bookingDetails.payInStore
             ? 'Pay in store'
@@ -87,7 +90,7 @@ export const handler: Handler = async (event) => {
                 `Customer: ${customer.name}`,
                 `Email: ${customer.email}`,
                 `Phone: ${customer.phone}`,
-                `Service: ${service.name} (${service.duration}) - ${priceDisplay}`,
+                `Service: ${service.name} (${formatDuration(durationMinutes)}) - ${priceDisplay}`,
                 `Payment Status: ${paymentStatus}`,
                 `Date: ${date}`,
                 `Time: ${timeSlot}`,

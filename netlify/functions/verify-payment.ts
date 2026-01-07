@@ -6,6 +6,7 @@
  */
 import { Handler } from '@netlify/functions';
 import Stripe from 'stripe';
+import { BookingData } from '../../src/config/booking-types';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -41,8 +42,16 @@ export const handler: Handler = async (event) => {
             };
         }
 
+        const durationMinutes = session.metadata?.serviceDuration
+            ? Number(session.metadata.serviceDuration)
+            : 0;
+
+        const price = session.metadata?.servicePrice
+            ? Number(session.metadata.servicePrice)
+            : 0;
+
         // Extract booking data from session metadata
-        const bookingData = {
+        const bookingData: BookingData = {
             customer: {
                 name: session.metadata?.customerName || '',
                 email: session.metadata?.customerEmail || session.customer_email || '',
@@ -51,9 +60,9 @@ export const handler: Handler = async (event) => {
             service: {
                 id: session.metadata?.serviceId || '',
                 name: session.metadata?.serviceName || '',
-                duration: session.metadata?.serviceDuration || '',
-                price: session.metadata?.servicePrice || '',
-                category: session.metadata?.serviceCategory || '',
+                duration: durationMinutes,
+                price: price,
+                category: session.metadata?.serviceCategory as 'inShop' | 'home',
                 description: session.metadata?.serviceDescription || '',
             },
             bookingDetails: {
@@ -63,6 +72,8 @@ export const handler: Handler = async (event) => {
                 stripePaymentPaid: session.payment_status === 'paid',
             }
         };
+
+        console.log('Verified Booking Data:', bookingData);
 
         // Validate booking data
         if (!bookingData.bookingDetails.date || !bookingData.bookingDetails.timeSlot) {
