@@ -1,7 +1,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import './BookingForm.css';
 import { Customer, BookingDetails, Service, BookingData } from '../../config/booking-types';
-import { getAvailableSlotsForDate } from '../../services/availabilityService';
+import { getAvailableSlotsForDate, TIME_SLOT_INTERVAL_MINUTES } from '../../services/availabilityService';
 import TimeSlotPicker from '../TimeSlotPicker/TimeSlotPicker';
 import { SERVICES } from '../../config/services';
 import { formatDuration } from '../../utils/duration';
@@ -43,13 +43,17 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
 
-    // Fetch available slots when date changes
+    // Fetch available slots when date or service selection changes
     useEffect(() => {
         const fetchSlots = async () => {
             if (formData.bookingDetails.date) {
                 setLoadingSlots(true);
                 try {
-                    const slots = await getAvailableSlotsForDate(new Date(formData.bookingDetails.date));
+                    const durationMinutes = Math.max(formData.service.duration, TIME_SLOT_INTERVAL_MINUTES);
+                    const slots = await getAvailableSlotsForDate(
+                        new Date(formData.bookingDetails.date),
+                        durationMinutes
+                    );
                     setAvailableSlots(slots);
                     // Clear selected slot if it's no longer available
                     if (formData.bookingDetails.timeSlot && !slots.includes(formData.bookingDetails.timeSlot)) {
@@ -68,7 +72,10 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         };
 
         fetchSlots();
-    }, [formData.bookingDetails.date, formData.bookingDetails.timeSlot]);
+    }, [
+        formData.bookingDetails.date,
+        formData.service.duration,
+    ]);
 
 
     const handleInputChange = (
@@ -326,7 +333,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             selectedSlot={formData.bookingDetails.timeSlot}
                             onSlotSelect={handleSlotSelect}
                             availableSlots={availableSlots}
-                            durationMinutes={formData.service.duration || 30}
+                            durationMinutes={formData.service.duration}
                         />
                     )}
                     {errors['bookingDetails.timeSlot'] && <span className="error-message">{errors['bookingDetails.timeSlot']}</span>}

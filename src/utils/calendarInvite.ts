@@ -22,10 +22,8 @@ export function buildCalendarInvite(booking: BookingData): { filename: string; c
     const startTime = new Date(bookingDetails.date);
     startTime.setHours(hours, minutes, 0, 0);
 
-    const durationMinutes = service.duration || 30;
-
     const endTime = new Date(startTime);
-    endTime.setMinutes(startTime.getMinutes() + durationMinutes);
+    endTime.setMinutes(startTime.getMinutes() + service.duration);
 
     const paymentStatus = bookingDetails.payInStore ? 'Pay in store' : 'Paid online';
     const priceDisplay = typeof service.price === 'number' ? `£${service.price.toFixed(2)}` : service.price;
@@ -35,7 +33,7 @@ export function buildCalendarInvite(booking: BookingData): { filename: string; c
         `Customer: ${customer.name}`,
         `Email: ${customer.email}`,
         `Phone: ${customer.phone}`,
-        `Service: ${service.name} (${formatDuration(durationMinutes)}) - ${priceDisplay}`,
+        `Service: ${service.name} (${formatDuration(service.duration)}) - ${priceDisplay}`,
         `Payment Status: ${paymentStatus}`,
         `Date: ${startTime.toLocaleDateString()}`,
         `Time: ${bookingDetails.timeSlot}`,

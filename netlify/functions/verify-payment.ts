@@ -42,38 +42,31 @@ export const handler: Handler = async (event) => {
             };
         }
 
-        const durationMinutes = session.metadata?.serviceDuration
-            ? Number(session.metadata.serviceDuration)
-            : 0;
-
-        const price = session.metadata?.servicePrice
-            ? Number(session.metadata.servicePrice)
-            : 0;
-
         // Extract booking data from session metadata
+        console.log('Session Metadata:', session.metadata);
+        
         const bookingData: BookingData = {
             customer: {
-                name: session.metadata?.customerName || '',
-                email: session.metadata?.customerEmail || session.customer_email || '',
-                phone: session.metadata?.customerPhone || '',
+                name: session.metadata?.customerName!,
+                email: session.metadata?.customerEmail!,
+                phone: session.metadata?.customerPhone!,
             },
             service: {
-                id: session.metadata?.serviceId || '',
-                name: session.metadata?.serviceName || '',
-                duration: durationMinutes,
-                price: price,
+                id: session.metadata?.serviceId!,
+                name: session.metadata?.serviceName!,
+                duration: Number(session.metadata?.serviceDuration)!,
+                price: Number(session.metadata?.servicePrice)!,
                 category: session.metadata?.serviceCategory as 'inShop' | 'home',
             },
             bookingDetails: {
-                date: session.metadata?.date || '',
-                timeSlot: session.metadata?.timeSlot || '',
+                date: session.metadata?.date!,
+                timeSlot: session.metadata?.timeSlot!,
                 payInStore: session.metadata?.payInStore === 'true',
                 stripePaymentPaid: session.payment_status === 'paid',
             }
         };
 
         console.log('Verified Booking Data:', bookingData);
-
         // Validate booking data
         if (!bookingData.bookingDetails.date || !bookingData.bookingDetails.timeSlot) {
             return {

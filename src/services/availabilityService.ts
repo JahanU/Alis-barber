@@ -8,7 +8,7 @@ import { parseTimeSlot } from '../utils/timeUtils';
 import { BUSINESS_ID } from '../config/business';
 
 // Width of each candidate time slot in minutes (must align with UI picker)
-const TIME_SLOT_INTERVAL_MINUTES = 20;
+export const TIME_SLOT_INTERVAL_MINUTES = 20;
 
 const getDefaultStaffId = async (): Promise<string | null> => {
     const { data, error } = await supabase
@@ -28,8 +28,14 @@ const getDefaultStaffId = async (): Promise<string | null> => {
 /**
  * Get available time slots for a specific date based on staff availability.
  * Merges slots from all time ranges for the day and excludes booked appointments.
+ * @param serviceDurationMinutes - length of the requested service, used to block slots that would overlap existing bookings.
  */
-export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<string[]> => {
+export const getAvailableSlotsForDate = async (
+    selectedDate: Date,
+    serviceDurationMinutes = TIME_SLOT_INTERVAL_MINUTES
+): Promise<string[]> => {
+    const requiredDuration = Math.max(serviceDurationMinutes, TIME_SLOT_INTERVAL_MINUTES);
+
     const staffId = await getDefaultStaffId();
     if (!staffId) {
         console.warn('No staff found; cannot compute availability.');
@@ -86,7 +92,7 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         const endMinutes = timeStringToMinutes(range.end_time);
 
         // Generate slots in this range
-        for (let minutes = startMinutes; minutes + TIME_SLOT_INTERVAL_MINUTES <= endMinutes; minutes += TIME_SLOT_INTERVAL_MINUTES) {
+        for (let minutes = startMinutes; minutes + requiredDuration <= endMinutes; minutes += TIME_SLOT_INTERVAL_MINUTES) {
             if (isToday && minutes <= nowMinutes) continue; // skip past times for today
             allSlots.add(minutesToDisplay(minutes)); // e.g., "14:20" -> "2:20 PM"
         }
@@ -110,14 +116,14 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         // Precompute appointment intervals in minutes to make overlap checks cheap
         const appointmentIntervals = appointments.map(apt => {
             const start = timeStringToMinutes(apt.appointment_time);
-            const duration = Number(apt.duration_minutes);
+            const duration = Number(apt.duration_minutes) || TIME_SLOT_INTERVAL_MINUTES;
             return { start, end: start + duration };
         });
 
         // Check each candidate slot for overlap with any appointment
         allSlots.forEach(slot => {
             const slotStart = slotToMinutes(slot); // minutes from midnight
-            const slotEnd = slotStart + TIME_SLOT_INTERVAL_MINUTES;
+            const slotEnd = slotStart + requiredDuration;
 
             const overlapsExisting = appointmentIntervals.some(({ start, end }) =>
                 slotStart < end && slotEnd > start

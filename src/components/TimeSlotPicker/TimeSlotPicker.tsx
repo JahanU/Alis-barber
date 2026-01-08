@@ -14,7 +14,7 @@ function TimeSlotPicker({
     selectedSlot,
     onSlotSelect,
     availableSlots,
-    durationMinutes = 30,
+    durationMinutes,
 }: TimeSlotPickerProps) {
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('en-US', {
