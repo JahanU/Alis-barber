@@ -44,7 +44,7 @@ export function buildCalendarInvite(booking: BookingData): { filename: string; c
     const icsLines = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//Ali Barbers//Booking//EN',
+        'PRODID:-//Ali\'s Barber//Booking//EN',
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH',
         'BEGIN:VEVENT',

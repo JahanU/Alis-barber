@@ -118,14 +118,14 @@ export const handler: Handler = async (event) => {
         if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
             try {
                 await transporter.sendMail({
-                    from: `"Ali Barbers" <${process.env.GMAIL_USER}>`,
+                    from: `"Ali's Barber" <${process.env.GMAIL_USER}>`,
                     to: customer.email,
-                    subject: 'Booking Confirmed - Ali Barbers',
+                    subject: 'Booking Confirmed - Ali\'s Barber',
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
                             <h1 style="color: #daa520;">Booking Confirmed!</h1>
                             <p>Hi ${customer.name},</p>
-                            <p>Your appointment at Ali Barbers has been successfully scheduled.</p>
+                            <p>Your appointment at Ali's Barber has been successfully scheduled.</p>
                             <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
                                 <p><strong>Service:</strong> ${service.name}</p>
                                 <p><strong>Date:</strong> ${date}</p>

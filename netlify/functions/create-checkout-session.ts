@@ -40,7 +40,7 @@ export const handler: Handler = async (event) => {
                 price_data: {
                     currency: 'gbp',
                     product_data: {
-                        name: 'Ali Barbers',
+                        name: 'Ali\'s Barber',
                         description: `${service.name} - ${date} at ${timeSlot}`,
                     },
                     unit_amount: service.price * 100, // Stripe takes cents, so multiply by 100

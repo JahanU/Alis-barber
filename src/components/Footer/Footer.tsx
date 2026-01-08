@@ -28,7 +28,7 @@ const Footer = () => {
                 </div>
 
                 <div className="footer-bottom">
-                    <p>&copy; {new Date().getFullYear()} Ali Barbers. Professional Grooming Services.</p>
+                    <p>&copy; {new Date().getFullYear()} Ali's Barber. Professional Grooming Services.</p>
                 </div>
             </div>
         </footer>
