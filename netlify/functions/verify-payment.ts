@@ -63,7 +63,6 @@ export const handler: Handler = async (event) => {
                 duration: durationMinutes,
                 price: price,
                 category: session.metadata?.serviceCategory as 'inShop' | 'home',
-                description: session.metadata?.serviceDescription || '',
             },
             bookingDetails: {
                 date: session.metadata?.date || '',
