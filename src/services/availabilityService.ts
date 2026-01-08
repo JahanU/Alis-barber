@@ -7,6 +7,9 @@ import { supabase } from '../config/supabaseClient';
 import { parseTimeSlot } from '../utils/timeUtils';
 import { BUSINESS_ID } from '../config/business';
 
+// Width of each candidate time slot in minutes (must align with UI picker)
+const TIME_SLOT_INTERVAL_MINUTES = 20;
+
 const getDefaultStaffId = async (): Promise<string | null> => {
     const { data, error } = await supabase
         .from('staff')
@@ -22,7 +25,6 @@ const getDefaultStaffId = async (): Promise<string | null> => {
 
     return data?.id ?? null;
 };
-
 /**
  * Get available time slots for a specific date based on staff availability.
  * Merges slots from all time ranges for the day and excludes booked appointments.
@@ -44,7 +46,7 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         .select('specific_date,end_date')
         .eq('staff_id', staffId)
         .eq('availability_type', 'annual_leave')
-        .or(`specific_date.eq.${dateString},and(specific_date.lte.${dateString},end_date.gte.${dateString})`);
+        .or(`specific_date.eq.${dateString},and(specific_date.lte.${dateString},end_date.gte.${dateString})`); // specific date or within range
 
     if (leaveError) {
         console.error('Error fetching annual leave:', leaveError);
@@ -75,28 +77,25 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
 
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
-    const currentHour = now.getHours();
-
+    const nowMinutes = now.getHours() * 60 + now.getMinutes(); // current time in minutes since midnight, filters out old slots for today
+    
     const allSlots = new Set<string>();
-
+    // Build candidate slots from working-hour ranges, skipping past times when viewing today
     for (const range of data) {
-        const [startHour] = range.start_time.split(':').map(Number);
-        const [endHour] = range.end_time.split(':').map(Number);
+        const startMinutes = timeStringToMinutes(range.start_time);
+        const endMinutes = timeStringToMinutes(range.end_time);
 
-        for (let hour = startHour; hour < endHour; hour++) {
-            if (isToday && hour <= currentHour) {
-                continue;
-            }
-
-            const period = hour >= 12 ? 'PM' : 'AM';
-            const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-            allSlots.add(`${displayHour}:00 ${period}`);
+        // Generate slots in this range
+        for (let minutes = startMinutes; minutes + TIME_SLOT_INTERVAL_MINUTES <= endMinutes; minutes += TIME_SLOT_INTERVAL_MINUTES) {
+            if (isToday && minutes <= nowMinutes) continue; // skip past times for today
+            allSlots.add(minutesToDisplay(minutes)); // e.g., "14:20" -> "2:20 PM"
         }
     }
 
+    // Fetch existing confirmed appointments for the date to exclude booked slots
     const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
-        .select('appointment_time')
+        .select('appointment_time,duration_minutes')
         .eq('appointment_date', dateString)
         .eq('status', 'confirmed')
         .eq('business_id', BUSINESS_ID);
@@ -105,23 +104,53 @@ export const getAvailableSlotsForDate = async (selectedDate: Date): Promise<stri
         console.error('Error fetching appointments:', appointmentsError);
     }
 
+    // Exclude slots that overlap with existing appointments
     if (appointments && appointments.length > 0) {
-        const bookedSlots = new Set<string>();
-
-        appointments.forEach(apt => {
-            const [hour] = apt.appointment_time.split(':').map(Number);
-            const period = hour >= 12 ? 'PM' : 'AM';
-            const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-            bookedSlots.add(`${displayHour}:00 ${period}`);
+        const slotsToRemove = new Set<string>();
+        // Precompute appointment intervals in minutes to make overlap checks cheap
+        const appointmentIntervals = appointments.map(apt => {
+            const start = timeStringToMinutes(apt.appointment_time);
+            const duration = Number(apt.duration_minutes);
+            return { start, end: start + duration };
         });
 
-        bookedSlots.forEach(slot => allSlots.delete(slot));
+        // Check each candidate slot for overlap with any appointment
+        allSlots.forEach(slot => {
+            const slotStart = slotToMinutes(slot); // minutes from midnight
+            const slotEnd = slotStart + TIME_SLOT_INTERVAL_MINUTES;
+
+            const overlapsExisting = appointmentIntervals.some(({ start, end }) =>
+                slotStart < end && slotEnd > start
+            );
+
+            if (overlapsExisting) {
+                slotsToRemove.add(slot);
+            }
+        });
+
+        slotsToRemove.forEach(slot => allSlots.delete(slot));
     }
 
-    return Array.from(allSlots).sort((a, b) => convertTo24Hour(a) - convertTo24Hour(b));
+    return Array.from(allSlots).sort((a, b) => slotToMinutes(a) - slotToMinutes(b));
 };
 
-function convertTo24Hour(timeSlot: string): number {
-    const { hours } = parseTimeSlot(timeSlot);
-    return hours;
+// Convert "HH:MM AM/PM" to minutes since midnight
+function slotToMinutes(timeSlot: string): number {
+    const { hours, minutes } = parseTimeSlot(timeSlot);
+    return hours * 60 + minutes;
+}
+
+// Convert "HH:MM[:SS]" to minutes since midnight
+function timeStringToMinutes(time: string): number {
+    const [h = 0, m = 0, s = 0] = time.split(':').map(Number);
+    return h * 60 + m + Math.floor(s / 60);
+}
+
+// Convert minutes since midnight back to a display string (e.g., "2:20 PM")
+function minutesToDisplay(totalMinutes: number): string {
+    const hours24 = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const period = hours24 >= 12 ? 'PM' : 'AM';
+    const displayHour = hours24 % 12 === 0 ? 12 : hours24 % 12;
+    return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
