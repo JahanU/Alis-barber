@@ -31,7 +31,6 @@
         "noEmit": true,
         /* Vite & Test Integration */
         "types": [
-            "vitest/globals",
             "vite/client"
         ]
     },
