@@ -3,8 +3,8 @@
  *
  * ROLE: Create appointment records in Supabase.
  */
-import { supabase } from '../config/supabaseClient';
-import { BUSINESS_ID } from '../config/business';
+import { supabase } from '../config/supabaseServerClient';
+import { BUSINESS_ID } from '../config/businessServer';
 
 export interface Appointment {
     id?: string;
