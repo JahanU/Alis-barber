@@ -1,13 +1,21 @@
 import './TimeSlotPicker.css';
+import { formatDuration } from '../../utils/duration';
 
 interface TimeSlotPickerProps {
     selectedDate: string;
     selectedSlot: string;
     onSlotSelect: (slot: string) => void;
     availableSlots: string[];
+    durationMinutes: number;
 }
 
-function TimeSlotPicker({ selectedDate, selectedSlot, onSlotSelect, availableSlots }: TimeSlotPickerProps) {
+function TimeSlotPicker({
+    selectedDate,
+    selectedSlot,
+    onSlotSelect,
+    availableSlots,
+    durationMinutes,
+}: TimeSlotPickerProps) {
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('en-US', {
             weekday: 'long',
@@ -38,7 +46,7 @@ function TimeSlotPicker({ selectedDate, selectedSlot, onSlotSelect, availableSlo
                             onClick={() => onSlotSelect(slot)}
                         >
                             <span className="slot-time">{slot}</span>
-                            <span className="slot-duration">1 hour</span>
+                            <span className="slot-duration">{formatDuration(durationMinutes)}</span>
                         </button>
                     ))}
                 </div>

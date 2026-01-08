@@ -1,6 +1,6 @@
 import { Handler } from '@netlify/functions';
-import { BUSINESS_ID } from '../../src/config/business';
-import { supabase } from '../../src/config/supabaseClient';
+import { BUSINESS_ID } from '../../src/config/businessServer';
+import { supabase } from '../../src/config/supabaseServerClient';
 
 export const handler: Handler = async (event) => {
     if (event.httpMethod !== 'POST') {

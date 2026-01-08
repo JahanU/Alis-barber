@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import './PriceList.css';
 import { SERVICES } from '../../config/services';
+import { formatDuration } from '../../utils/duration';
+import { Service } from '../../config/booking-types';
 
 function PriceList() {
     const navigate = useNavigate();
@@ -8,7 +10,7 @@ function PriceList() {
     const inShopServices = SERVICES.filter(s => s.category === 'inShop');
     const homeServices = SERVICES.filter(s => s.category === 'home');
 
-    const renderServiceCard = (service: any) => (
+    const renderServiceCard = (service: Service) => (
         <div key={service.id} className="price-card">
             <div className="price-card-main">
                 <div className="service-info">
@@ -17,7 +19,7 @@ function PriceList() {
                 </div>
                 <div className="service-meta">
                     <span className="service-cost">£{service.price}</span>
-                    <span className="service-time">{service.duration}</span>
+                    <span className="service-time">{formatDuration(service.duration)}</span>
                 </div>
             </div>
         </div>

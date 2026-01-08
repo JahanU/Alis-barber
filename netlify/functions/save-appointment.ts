@@ -8,7 +8,7 @@ import { Handler } from '@netlify/functions';
 import { BookingData } from '../../src/config/booking-types';
 import { parseTimeSlot } from '../../src/utils/timeUtils';
 import { createAppointment, Appointment } from '../../src/services/appointmentService';
-import { BUSINESS_ID } from '../../src/config/business';
+import { BUSINESS_ID } from '../../src/config/businessServer';
 
 export const handler: Handler = async (event) => {
     if (event.httpMethod !== 'POST') {
@@ -39,7 +39,7 @@ export const handler: Handler = async (event) => {
         console.log(`[save-appointment] Recording appointment in Supabase for ${customer.email}...`);
 
         const appointment: Appointment = {
-            business_id: BUSINESS_ID,
+            business_id: BUSINESS_ID!,
             customer_name: customer.name,
             customer_email: customer.email,
             customer_phone: customer.phone,
@@ -48,6 +48,7 @@ export const handler: Handler = async (event) => {
             service_price: Number(service.price),
             appointment_date: date,
             appointment_time: `${display24h}:00`, // Restore HH:MM:SS format for Supabase time type
+            duration_minutes: service.duration,
             payment_status: bookingDetails.stripePaymentPaid ? 'paid_online' : 'pay_in_store',
             google_event_id: googleEventId,
             status: 'confirmed',

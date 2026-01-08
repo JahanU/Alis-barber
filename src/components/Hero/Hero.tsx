@@ -12,7 +12,7 @@ function Hero() {
             <div className="container hero-content">
                 <div className="hero-text fade-in">
                     <h1>
-                        <span className="hero-title-line text-gradient">Ali Barbers</span>
+                        <span className="hero-title-line text-gradient">Ali's Barber</span>
                         <span className="hero-subtitle">Premium Barbering Excellence</span>
                     </h1>
 

@@ -6,6 +6,7 @@
  */
 import { Handler } from '@netlify/functions';
 import Stripe from 'stripe';
+import { BookingData } from '../../src/config/booking-types';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -42,28 +43,30 @@ export const handler: Handler = async (event) => {
         }
 
         // Extract booking data from session metadata
-        const bookingData = {
+        console.log('Session Metadata:', session.metadata);
+        
+        const bookingData: BookingData = {
             customer: {
-                name: session.metadata?.customerName || '',
-                email: session.metadata?.customerEmail || session.customer_email || '',
-                phone: session.metadata?.customerPhone || '',
+                name: session.metadata?.customerName!,
+                email: session.metadata?.customerEmail!,
+                phone: session.metadata?.customerPhone!,
             },
             service: {
-                id: session.metadata?.serviceId || '',
-                name: session.metadata?.serviceName || '',
-                duration: session.metadata?.serviceDuration || '',
-                price: session.metadata?.servicePrice || '',
-                category: session.metadata?.serviceCategory || '',
-                description: session.metadata?.serviceDescription || '',
+                id: session.metadata?.serviceId!,
+                name: session.metadata?.serviceName!,
+                duration: Number(session.metadata?.serviceDuration)!,
+                price: Number(session.metadata?.servicePrice)!,
+                category: session.metadata?.serviceCategory as 'inShop' | 'home',
             },
             bookingDetails: {
-                date: session.metadata?.date || '',
-                timeSlot: session.metadata?.timeSlot || '',
+                date: session.metadata?.date!,
+                timeSlot: session.metadata?.timeSlot!,
                 payInStore: session.metadata?.payInStore === 'true',
                 stripePaymentPaid: session.payment_status === 'paid',
             }
         };
 
+        console.log('Verified Booking Data:', bookingData);
         // Validate booking data
         if (!bookingData.bookingDetails.date || !bookingData.bookingDetails.timeSlot) {
             return {
