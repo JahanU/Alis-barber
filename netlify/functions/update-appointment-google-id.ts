@@ -40,13 +40,14 @@ export const handler: Handler = async (event) => {
             statusCode: 200,
             body: JSON.stringify({ message: 'Appointment updated successfully' }),
         };
-    } catch (err: any) {
-        console.error('[update-appointment-google-id] Error:', err?.message || err);
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error('[update-appointment-google-id] Error:', message, err);
         return {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'Failed to update appointment',
-                message: err?.message || 'Unknown error',
+                message,
             }),
         };
     }

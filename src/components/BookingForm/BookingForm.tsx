@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import './BookingForm.css';
 import { Customer, BookingDetails, Service, BookingData } from '../../config/booking-types';
 import { getAvailableSlotsForDate } from '../../services/availabilityService';
@@ -68,11 +68,11 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         };
 
         fetchSlots();
-    }, [formData.bookingDetails.date]);
+    }, [formData.bookingDetails.date, formData.bookingDetails.timeSlot]);
 
 
     const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement>
+        e: ChangeEvent<HTMLInputElement>
     ) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => {
@@ -164,7 +164,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (validateForm()) {

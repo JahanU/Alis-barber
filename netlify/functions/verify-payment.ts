@@ -96,14 +96,15 @@ export const handler: Handler = async (event) => {
                 sessionId: session.id,
             }),
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
         console.error('Payment Verification Error:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({
                 verified: false,
                 error: 'Payment verification failed',
-                message: error.message
+                message
             }),
         };
     }
