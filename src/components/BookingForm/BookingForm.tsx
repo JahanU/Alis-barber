@@ -333,7 +333,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             selectedSlot={formData.bookingDetails.timeSlot}
                             onSlotSelect={handleSlotSelect}
                             availableSlots={availableSlots}
-                            durationMinutes={formData.service.duration || 30}
+                            durationMinutes={formData.service.duration}
                         />
                     )}
                     {errors['bookingDetails.timeSlot'] && <span className="error-message">{errors['bookingDetails.timeSlot']}</span>}

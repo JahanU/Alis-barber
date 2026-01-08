@@ -71,7 +71,7 @@ export const handler: Handler = async (event) => {
         const startDateTime = new Date(date);
         startDateTime.setHours(hours, minutes, 0, 0);
 
-        const durationMinutes = service.duration || 30;
+        const durationMinutes = service.duration;
 
         const endDateTime = new Date(startDateTime);
         endDateTime.setMinutes(startDateTime.getMinutes() + durationMinutes);
