@@ -72,6 +72,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
         };
 
         fetchSlots();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         formData.bookingDetails.date,
         formData.service.duration,

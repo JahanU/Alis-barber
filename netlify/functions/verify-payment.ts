@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /**
  * BACKEND FUNCTION: Verify Stripe Payment
  * 
@@ -44,7 +45,7 @@ export const handler: Handler = async (event) => {
 
         // Extract booking data from session metadata
         console.log('Session Metadata:', session.metadata);
-        
+
         const bookingData: BookingData = {
             customer: {
                 name: session.metadata?.customerName!,

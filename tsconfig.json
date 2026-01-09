@@ -31,7 +31,8 @@
         "noEmit": true,
         /* Vite & Test Integration */
         "types": [
-            "vite/client"
+            "vite/client",
+            "node"
         ]
     },
     "include": [
