@@ -78,13 +78,14 @@ export const handler: Handler = async (event) => {
                 url: session.url
             }),
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
         console.error('Stripe Checkout Session Error:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'Failed to create checkout session',
-                message: error.message
+                message
             }),
         };
     }

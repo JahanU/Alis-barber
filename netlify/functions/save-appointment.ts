@@ -64,13 +64,14 @@ export const handler: Handler = async (event) => {
             }),
         };
 
-    } catch (error: any) {
-        console.error('[save-appointment] Error:', error.message);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('[save-appointment] Error:', message, error);
         return {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'Failed to save appointment',
-                message: error.message
+                message
             }),
         };
     }

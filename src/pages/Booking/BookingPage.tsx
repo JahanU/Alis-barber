@@ -82,9 +82,10 @@ function BookingPage() {
                 console.error('Background calendar creation failed:', calendarErr);
                 setError('Booking saved, but we could not add it to the calendar.');
             });
-        } catch (err: any) {
-            console.error('Booking error:', err);
-            setError(err.message || 'An unexpected error occurred. Please try again.');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+            console.error('Booking error:', message, err);
+            setError(message);
             setBookingData(null);
         } finally {
             setIsSubmitting(false);
@@ -110,10 +111,11 @@ function BookingPage() {
                     }
                 })
                 .catch(err => {
-                    console.error('Payment error:', err);
-                    setError(err.message);
+                    const message = err instanceof Error ? err.message : 'Payment verification failed.';
+                    console.error('Payment error:', message, err);
+                    setError(message);
                     isProcessingPayment.current = false; // Unlock on failure
-                })
+                });
         }
     }, [handleBookingSubmit]);
 

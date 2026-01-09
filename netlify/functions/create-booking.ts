@@ -66,7 +66,7 @@ export const handler: Handler = async (event) => {
         });
 
         const calendar = google.calendar({ version: 'v3', auth });
-        const { hours, minutes, display24h } = parseTimeSlot(timeSlot);
+        const { hours, minutes } = parseTimeSlot(timeSlot);
 
         const startDateTime = new Date(date);
         startDateTime.setHours(hours, minutes, 0, 0);
@@ -152,13 +152,14 @@ export const handler: Handler = async (event) => {
             }),
         };
 
-    } catch (error: any) {
-        console.error('[create-booking] Error:', error.message);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('[create-booking] Error:', message, error);
         return {
             statusCode: 500,
             body: JSON.stringify({
                 error: 'Failed to create booking',
-                message: error.message
+                message,
             }),
         };
     }

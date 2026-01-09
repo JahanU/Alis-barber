@@ -12,7 +12,9 @@
  */
 export function parseTimeSlot(timeSlot: string): { hours: number; minutes: number; display24h: string } {
     const [time, period] = timeSlot.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
+    const [hoursRaw, minutesRaw] = time.split(':').map(Number);
+    let hours = hoursRaw;
+    const minutes = minutesRaw ?? 0;
 
     if (period === 'PM' && hours !== 12) {
         hours += 12;
