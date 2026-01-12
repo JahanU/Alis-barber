@@ -106,7 +106,15 @@
     padding: var(--spacing-xl) 0;
   }
 
+  .booking-view {
+    align-items: flex-start;
+  }
+
   .error-banner {
     padding: var(--spacing-sm);
+  }
+
+  .error-banner span {
+    font-size: 0.85rem;
   }
 }

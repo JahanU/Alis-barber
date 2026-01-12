@@ -93,13 +93,12 @@
 /* Responsive */
 @media (max-width: 768px) {
     .time-slots-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-sm);
     }
 
     .time-slot {
         padding: var(--spacing-md) var(--spacing-xs);
-        /* Larger touch target vertical */
     }
 
     .slot-time {
@@ -107,6 +106,21 @@
     }
 
     .slot-duration {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .time-slots-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+    }
+
+    .time-slot {
+        padding: var(--spacing-sm);
+    }
+
+    .slot-time {
+        font-size: 0.95rem;
     }
 }

@@ -202,52 +202,69 @@ input[type="date"]:hover::-webkit-calendar-picker-indicator {
 /* Responsive */
 @media (max-width: 768px) {
     .booking-form-container {
-        padding: var(--spacing-md);
+        padding: var(--spacing-lg);
         margin: var(--spacing-sm);
+        border-radius: var(--radius-md);
     }
 
     .booking-form-header {
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+    }
+
+    .booking-form-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .booking-form {
+        gap: var(--spacing-lg);
+    }
+
+    .form-section h3 {
+        font-size: 1.15rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .service-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .service-card {
+        padding: var(--spacing-md);
+    }
+
+    .form-actions {
         flex-direction: column;
         gap: var(--spacing-sm);
-        text-align: center;
-        align-items: center;
+        padding-top: var(--spacing-lg);
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        padding: 1.1rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-form-container {
+        padding: var(--spacing-md);
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
     }
 
     .booking-form-header h2 {
         font-size: 1.5rem;
     }
 
-
-
-    .form-section h3 {
-        font-size: 1.1rem;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .service-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .service-card {
-        padding: var(--spacing-sm);
-    }
-
-    .service-name {
-        font-size: 0.95rem;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
-        /* Stack buttons on mobile */
-        gap: var(--spacing-sm);
-    }
-
-    .form-actions .btn {
-        width: 100%;
-        padding: var(--spacing-md);
-        /* Larger touch target */
+    .service-details {
+        flex-direction: row;
     }
 }

@@ -100,11 +100,39 @@
 }
 
 @media (max-width: 768px) {
+    .shop-info {
+        padding: 60px 0;
+    }
+
     .shop-info-grid {
         grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 0 var(--spacing-md);
     }
 
     .info-card {
-        padding: 30px;
+        padding: 30px 20px;
+    }
+
+    .address {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .shop-info {
+        padding: 40px 0;
+    }
+
+    .info-card {
+        padding: 24px 16px;
+    }
+
+    .address {
+        font-size: 1.15rem;
+    }
+
+    .hours-row {
+        font-size: 0.95rem;
     }
 }
