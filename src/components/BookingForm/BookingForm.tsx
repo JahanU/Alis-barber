@@ -264,7 +264,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                         </div>
                     </div>
 
-                    <div className="form-group">
+                    {/* <div className="form-group">
                         <label className="checkbox-container">
                             <input
                                 type="checkbox"
@@ -274,7 +274,7 @@ function BookingForm({ onSubmit, onCancel, isSubmitting = false }: BookingFormPr
                             />
                             <span className="checkbox-label">Pay in store</span>
                         </label>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="form-section">
